@@ -1,0 +1,68 @@
+<h3>Type Management</h3>
+<div>
+  <form>
+    <div class="form-group">
+      <label class="col-form-label">New Type:</label>
+      <input type="text" class="form-control" #typeName>
+    </div>
+    <button type="submit" class="btn btn-primary" (click)="addType(typeName.value); typeName.value=''">Submit</button>
+  </form>
+</div>
+<br>
+<div>
+  <div>
+    <ngx-datatable
+      class="bootstrap"
+      [rows]="types"
+      [limit]="8"
+      [columnMode]="'force'"
+      [headerHeight]="50"
+      [footerHeight]="50"
+      [rowHeight]="'auto'">
+      <ngx-datatable-column name="No.">
+        <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
+          {{ column.name }}
+        </ng-template>
+        <ng-template let-rowIndex="rowIndex" ngx-datatable-cell-template>
+          {{ rowIndex+1 }}
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column name="Type Name">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{ column.name }}
+        </ng-template>
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          {{ row.name }}
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column name="Operations">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{column.name}}
+        </ng-template>
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <button class="btn btn-sm btn-primary">Edit</button> &nbsp;
+          <button (click)="deleteType(row.id)" class="btn btn-sm btn-danger">Delete</button>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+  </div>
+</div>
+
+<hr>
+
+<h3>Default Parameters</h3>
+<div>
+  <form>
+    <div class="form-group">
+      <label class="col-form-label">Default Group Threshold: {{ groupThreshold.value }}</label>
+      <input type="range" class="custom-range" min="0" max="1" step="0.1" value="{{ groupThreshold.value }}" #ref (change)="changeGroupThreshold(ref.value)">
+    </div>
+    <!--<div class="form-group">-->
+      <!--<label class="col-form-label">Default Matchup Threshold: {{ matchupThreshold.value }}</label>-->
+      <!--<input type="range" class="custom-range" min="0" max="1" step="0.1" value="{{ matchupThreshold.value }}" #ref2 (change)="changeMatchupThreshold(ref2.value)">-->
+    <!--</div>-->
+    <!--<button type="submit" class="btn btn-primary">Submit</button>-->
+  </form>
+</div>

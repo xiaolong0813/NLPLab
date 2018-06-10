@@ -1,0 +1,10 @@
+<div class="alert alert-fixed alert-dismissible fade"
+     [class.alert-success]="'success'==messageService.alert_type"
+     [class.alert-danger]="'danger'==messageService.alert_type"
+     [class.show]="messageService.alert_new"
+     role="alert">
+  {{ messageService.alert_message }}
+  <button type="button" (click)="messageService.close_alert()" class="close" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>

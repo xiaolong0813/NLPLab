@@ -1,0 +1,16 @@
+footer {
+  p {
+    margin-top: 1rem;
+  }
+  width: 100%;
+  text-align: center;
+  vertical-align: center;
+
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+
+  background-color: #212529;
+  color: white;
+}
