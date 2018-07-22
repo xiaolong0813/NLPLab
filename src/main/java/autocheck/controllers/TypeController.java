@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
+//@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping(path = "/api/types")
 public class TypeController {
     @Autowired
@@ -37,7 +37,7 @@ public class TypeController {
         return message;
     }
 
-//    // Update type
+    // Update type
     @PutMapping
     public Message updateType(@RequestBody Type type) {
         Message message = new Message();

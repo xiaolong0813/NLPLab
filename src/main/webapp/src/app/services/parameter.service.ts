@@ -14,7 +14,7 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class ParameterService {
-  private api = 'http://localhost:8080/api/parameters';  // URL to web api
+  private api = 'http://localhost:7890/api/parameters';  // URL to web api
   constructor(
     private http: HttpClient
   ) { }

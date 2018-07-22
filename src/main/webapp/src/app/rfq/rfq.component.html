@@ -1,11 +1,19 @@
 <button type="button" class="btn btn-info" (click)="openModelWithComponent()">Upload</button>
 <hr>
+<div class="alert alert-fixed alert-dismissible fade show alert-danger"
+     [style.display]="fileService.alert_new"
+     role="alert">
+  File(s) <span *ngFor="let msg of fileService.processedFile">"{{ msg.filename }}" </span> is(are) under processed.
+  <button type="button" (click)="fileService.close_alert()" class="close" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
 <div class="row">
   <div class="col-12">
     <div class="tab-content">
       <ngx-datatable
         class="bootstrap"
-        [rows]=""
+        [rows]="docs"
         [limit]="8"
         [columnMode]="'force'"
         [headerHeight]="50"
@@ -20,19 +28,43 @@
           </ng-template>
         </ngx-datatable-column>
 
+        <ngx-datatable-column name="Filename">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{ column.name }}
+          </ng-template>
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            {{ row.filename }}
+          </ng-template>
+        </ngx-datatable-column>
+
         <ngx-datatable-column name="Type Name">
           <ng-template let-column="column" ngx-datatable-header-template>
             {{ column.name }}
           </ng-template>
           <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            {{ row.type }}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column name="Status">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{ column.name }}
+          </ng-template>
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <span *ngIf="row.status == 0" class="badge badge-info">Unprocessed</span>
+            <span *ngIf="row.status == 1" class="badge badge-primary">Processing</span>
+            <span *ngIf="row.status == 2" class="badge badge-success">Finished</span>
           </ng-template>
         </ngx-datatable-column>
 
         <ngx-datatable-column name="Operations">
           <ng-template let-column="column" ngx-datatable-header-template>
-            {{column.name}}
+            {{ column.name }}
           </ng-template>
           <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <button *ngIf="row.status == 0" class="btn btn-sm btn-primary" (click)="processDoc(row.id)">Process </button>
+            <button *ngIf="row.status == 2" class="btn btn-sm btn-primary" (click)="downloadDoc(row.id)">Download </button>
+            &nbsp;<button class="btn btn-sm btn-danger">Delete</button>
           </ng-template>
         </ngx-datatable-column>
       </ngx-datatable>

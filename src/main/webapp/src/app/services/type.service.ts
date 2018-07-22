@@ -13,7 +13,7 @@ const httpOptions = {
 @Injectable({providedIn: 'root'})
 
 export class TypeService {
-  private api = 'http://localhost:8080/api/types';  // URL to web api
+  private api = 'http://localhost:7890/api/types';  // URL to web api
 
   constructor(
     private http:HttpClient
