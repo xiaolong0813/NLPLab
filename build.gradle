@@ -50,9 +50,9 @@ sourceSets {
     }
 }
 
-processResources {
-    dependsOn "buildAngular"
-}
+//processResources {
+//    dependsOn "buildAngular"
+//}
 
 task buildAngular() {
 //    dependsOn "installAngular"
