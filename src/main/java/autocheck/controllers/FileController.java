@@ -74,8 +74,8 @@ public class FileController {
             return message;
         } else {
             Document doc = doc_opt.get();
-            if (doc.getStatus() == 0) {
-                doc.setStatus(1);
+            if (doc.getStatus() == 2) {
+                doc.setStatus(3);
                 documentRepository.save(doc);
                 fileProcessService.processDoc(doc);
             }
@@ -121,10 +121,12 @@ public class FileController {
                 doc.setThreshold(threshold);
                 documentRepository.save(doc);
 
+                doc.setStatus(1);
+                documentRepository.save(doc);
                 if (fileType == 0) {
-                    doc.setStatus(1);
-                    documentRepository.save(doc);
                     fileProcessService.processDev(doc);
+                } else {
+                    fileProcessService.processDocSentence(doc);
                 }
 
                 Iterable<Document> docs = documentRepository.findByStatusAndFiletype(1, fileType);

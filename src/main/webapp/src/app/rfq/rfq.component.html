@@ -51,9 +51,10 @@
             {{ column.name }}
           </ng-template>
           <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-            <span *ngIf="row.status == 0" class="badge badge-info">Unprocessed</span>
-            <span *ngIf="row.status == 1" class="badge badge-primary">Processing</span>
-            <span *ngIf="row.status == 2" class="badge badge-success">Finished</span>
+            <span *ngIf="row.status == 1" class="badge badge-info">Splitting</span>
+            <span *ngIf="row.status == 2" class="badge badge-primary">Unprocessed</span>
+            <span *ngIf="row.status == 3" class="badge badge-info">Processing</span>
+            <span *ngIf="row.status == 4" class="badge badge-success">Finished</span>
           </ng-template>
         </ngx-datatable-column>
 
@@ -62,8 +63,8 @@
             {{ column.name }}
           </ng-template>
           <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-            <button *ngIf="row.status == 0" class="btn btn-sm btn-primary" (click)="processDoc(row.id)">Process </button>
-            <button *ngIf="row.status == 2" class="btn btn-sm btn-primary" (click)="downloadDoc(row.id)">Download </button>
+            <button *ngIf="row.status == 2" class="btn btn-sm btn-primary" (click)="processDoc(row.id)">Process </button>
+            <button *ngIf="row.status == 4" class="btn btn-sm btn-primary" (click)="downloadDoc(row.id)">Download </button>
             &nbsp;<button class="btn btn-sm btn-danger">Delete</button>
           </ng-template>
         </ngx-datatable-column>

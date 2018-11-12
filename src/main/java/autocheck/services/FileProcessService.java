@@ -1,9 +1,9 @@
 package autocheck.services;
 
-import autocheck.models.Deviation;
-import autocheck.models.DeviationRepository;
-import autocheck.models.Document;
-import autocheck.models.DocumentRepository;
+import autocheck.models.*;
+//import edu.stanford.nlp.pipeline.CoreDocument;
+//import edu.stanford.nlp.pipeline.CoreSentence;
+//import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Properties;
 
 @Service
 public class FileProcessService {
@@ -32,6 +33,9 @@ public class FileProcessService {
 
     @Autowired
     private DeviationRepository deviationRepository;
+
+    @Autowired
+    private SentenceRepository sentenceRepository;
 
     private String path = "/Users/sefer/Documents/FDU/Lab/Project/Siemens/autocheck/file/";
 
@@ -73,7 +77,7 @@ public class FileProcessService {
     @Async
     public void processDoc(Document doc) throws IOException {
         System.out.println("Start processing document file " + doc.getFilename());
-        //TODO process document; 多线程？
+
         String filepath = path + doc.getFilepath();
         String resultpath = filepath + "_deviation.xlsx";
 
@@ -176,8 +180,86 @@ public class FileProcessService {
             }
         }
 
+        // process new content
+        List<Sentence> new_sentences = sentenceRepository.findByDoc_id(doc.getId());
+        List<Sentence> old_sentences = sentenceRepository.findByTypeAndDoc_idIsNot(doc.getType(), doc.getId());
+
+        boolean sen_flag;
+        for (Sentence sentence: new_sentences) {
+            sen_flag = false;
+            for (Sentence sentence1: old_sentences) {
+                simValue = similarity.getSimilarity(sentence.getText(), sentence1.getText());
+                if (simValue > 0.9) {
+                    sen_flag = true;
+                }
+            }
+            if (!sen_flag) {
+                System.out.println(rowNum);
+                System.out.println("DEV TEXT: empty");
+                System.out.println("DOC TEXT" + sentence.getText());
+                System.out.println("Heading: empty");
+
+                // Add to Excel
+                row = sheet.createRow(rowNum);
+                cell = row.createCell(0); // ID
+                cell.setCellValue(rowNum+1);
+                cell = row.createCell(1); // chapter
+                cell.setCellValue("");
+                cell = row.createCell(2); // content
+                cell.setCellValue("");
+                cell = row.createCell(3); // source_content
+                cell.setCellValue(sentence.getText());
+                cell = row.createCell(4); // Dev_content
+                cell.setCellValue("");
+                cell = row.createCell(5); // E/C
+                cell.setCellValue("");
+                rowNum += 1;
+            }
+        }
+
         wb.write(new FileOutputStream(resultpath));
 
+        doc.setStatus(4);
+        documentRepository.save(doc);
+    }
+
+    @Async
+    public void processDocSentence(Document doc) throws IOException {
+        System.out.println("Start splitting document file " + doc.getFilename());
+
+//        Properties props = new Properties();
+//        props.setProperty("annotators", "tokenize,ssplit");
+//        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+        String filepath = path + doc.getFilepath();
+        // Process Document
+        File file = new File(filepath);
+        XWPFDocument document = new XWPFDocument(new FileInputStream(file));
+        List<XWPFParagraph> paragraphs = document.getParagraphs();
+
+        int tot = 0;
+
+        for (XWPFParagraph paragraph: paragraphs) {
+            String p_text = paragraph.getText();
+            Sentence sentence1 = new Sentence();
+            sentence1.setDoc_id(doc.getId());
+            sentence1.setType(doc.getType());
+            sentence1.setText(p_text);
+            sentenceRepository.save(sentence1);
+            tot++;
+
+//            CoreDocument para_doc = new CoreDocument(p_text);
+//            pipeline.annotate(para_doc);
+//            for (CoreSentence sentence:para_doc.sentences()) {
+//                Sentence sentence1 = new Sentence();
+//                sentence1.setDoc_id(doc.getId());
+//                sentence1.setType(doc.getType());
+//                sentence1.setText(sentence.text());
+//                sentenceRepository.save(sentence1);
+//                tot++;
+//            }
+        }
+        System.out.println("Finish splitting, the document has " + tot + " sentences.");
         doc.setStatus(2);
         documentRepository.save(doc);
     }
