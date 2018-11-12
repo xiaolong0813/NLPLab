@@ -4,7 +4,7 @@ import { BsModalService } from "ngx-bootstrap";
 import { BsModalRef } from "ngx-bootstrap";
 import { ModalContentComponent } from "../modal-content/modal-content.component";
 
-import { saveAs } from 'file-saver/FileSaver';
+import { saveAs } from 'file-saver';
 
 import { Type } from "../type";
 import { Document } from "../document";
@@ -12,7 +12,7 @@ import { Document } from "../document";
 import { TypeService } from "../services/type.service";
 import { ParameterService } from "../services/parameter.service";
 import { FileService } from "../services/file.service";
-import {MessageService} from "../services/message.service";
+import { MessageService } from "../services/message.service";
 
 @Component({
   selector: 'app-rfq',
@@ -82,6 +82,7 @@ export class RfqComponent implements OnInit{
   downloadDoc(doc_id: number) {
     this.fileService.downloadDoc(doc_id)
       .subscribe(data => {
+        console.log("???");
         saveAs(data);
       });
   }

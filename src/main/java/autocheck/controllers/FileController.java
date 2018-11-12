@@ -18,8 +18,8 @@ import java.sql.Timestamp;
 import java.util.Optional;
 
 @RestController
-//@CrossOrigin(origins = "http://localhost:4200")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:4200")
+//@CrossOrigin(origins = "*")
 @RequestMapping(path = "/api/file")
 public class FileController {
 

@@ -5,9 +5,11 @@ import { Observable, of } from 'rxjs';
 
 import { Message } from "../message";
 import {Document} from "../document";
+import {tap} from "rxjs/operators";
 
 const httpOptions = {
-  headers: {'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}
+  headers: {'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
+  responseType: 'blob'
 };
 
 @Injectable({providedIn: 'root'})
@@ -38,7 +40,15 @@ export class FileService {
   }
 
   downloadDoc(doc_id: number): Observable<Blob> {
-    return this.http.get<Blob>(this.api+'downloadDoc/'+doc_id, httpOptions);
+    return this.http.get(this.api+'downloadDoc/'+doc_id, {
+      headers: {'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
+      responseType: 'blob'
+    }).pipe(
+      tap(
+        data => console.log(data),
+        error=> console.log(error)
+      )
+    );
   }
 
   newAlerts(docs: Document[]) {
