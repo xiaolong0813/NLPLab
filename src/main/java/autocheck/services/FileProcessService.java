@@ -11,6 +11,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -157,10 +158,10 @@ public class FileProcessService {
                     }
                 }
 
-                System.out.println(rowNum);
-                System.out.println("DEV TEXT" + dev_text);
-                System.out.println("DOC TEXT" + maxString);
-                System.out.println("Heading" + heading);
+//                System.out.println(rowNum);
+//                System.out.println("DEV TEXT" + dev_text);
+//                System.out.println("DOC TEXT" + maxString);
+//                System.out.println("Heading" + heading);
 
                 // Add to Excel
                 row = sheet.createRow(rowNum);
@@ -194,10 +195,10 @@ public class FileProcessService {
                 }
             }
             if (!sen_flag) {
-                System.out.println(rowNum);
-                System.out.println("DEV TEXT: empty");
-                System.out.println("DOC TEXT" + sentence.getText());
-                System.out.println("Heading: empty");
+//                System.out.println(rowNum);
+//                System.out.println("DEV TEXT: empty");
+//                System.out.println("DOC TEXT" + sentence.getText());
+//                System.out.println("Heading: empty");
 
                 // Add to Excel
                 row = sheet.createRow(rowNum);
@@ -236,10 +237,14 @@ public class FileProcessService {
         File file = new File(filepath);
         XWPFDocument document = new XWPFDocument(new FileInputStream(file));
         List<XWPFParagraph> paragraphs = document.getParagraphs();
+        List<XWPFRun> pruns;
 
         int tot = 0;
 
         for (XWPFParagraph paragraph: paragraphs) {
+//            if (paragraph.getRuns().get(0).isHighlighted()) continue;
+            pruns = paragraph.getRuns();
+            if (pruns.size() == 0 || pruns.get(0).isHighlighted()) continue;
             String p_text = paragraph.getText();
             Sentence sentence1 = new Sentence();
             sentence1.setDoc_id(doc.getId());
