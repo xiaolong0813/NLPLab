@@ -59,6 +59,28 @@
       <label class="col-form-label">Default Group Threshold: {{ groupThreshold.value }}</label>
       <input type="range" class="custom-range" min="0" max="1" step="0.1" value="{{ groupThreshold.value }}" #ref (change)="changeGroupThreshold(ref.value)">
     </div>
+    <div class="form-group">
+      <label class="col-form-label">Check New Sentences: </label>
+      <input type="checkbox" [checked]="checkNewSentences.value" (change)="changeCheckNewSentences()">
+    </div>
+    <div class="form-group">
+      <label class="col-form-label">Sentence Similarity Algorithm:
+        <select [value]="similarityAlgorithm.value" (change)="changeSimilarityAlgorithm($event.target.value)">
+          <option [value]="item.id"
+                  *ngFor="let item of similarityAlgorithmArray">{{item.value}}</option>
+        </select>
+      </label>
+      <!--<ng-select [items]="similarityAlgorithmArray"-->
+                 <!--bindLabel="value"-->
+                 <!--bindValue="id"-->
+                 <!--ng-model="similarityAlgorithm.value"-->
+                 <!--ng-change="changeSimilarityAlgorithm()"-->
+                 <!--class="form-control">-->
+      <!--</ng-select>-->
+      <div>
+        <a href="https://github.com/shibing624/similarity" target="_blank">Reference</a>
+      </div>
+    </div>
     <!--<div class="form-group">-->
       <!--<label class="col-form-label">Default Matchup Threshold: {{ matchupThreshold.value }}</label>-->
       <!--<input type="range" class="custom-range" min="0" max="1" step="0.1" value="{{ matchupThreshold.value }}" #ref2 (change)="changeMatchupThreshold(ref2.value)">-->

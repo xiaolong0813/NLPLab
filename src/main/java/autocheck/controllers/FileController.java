@@ -2,6 +2,8 @@ package autocheck.controllers;
 
 import autocheck.models.*;
 import autocheck.services.FileProcessService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -22,6 +24,7 @@ import java.util.Optional;
 //@CrossOrigin(origins = "*")
 @RequestMapping(path = "/api/file")
 public class FileController {
+    private static final Logger logger= LogManager.getLogger(FileController.class);
 
     private String path = "/Users/sefer/Documents/FDU/Lab/Project/Siemens/autocheck/file/";
 
@@ -36,11 +39,13 @@ public class FileController {
 
     @GetMapping(path = "/getProcessing/{fileType}")
     public Iterable<Document> getProcessing(@PathVariable String fileType) {
+        logger.info("Return documents under processing");
         return documentRepository.findByStatusAndFiletype(1, Integer.parseInt(fileType));
     }
 
     @GetMapping(path="/getAll/{fileType}")
     public Iterable<Document> getAll(@PathVariable String fileType) {
+        logger.info("Return all the documents");
         return documentRepository.findByFiletype(Integer.parseInt(fileType));
     }
 
@@ -50,12 +55,13 @@ public class FileController {
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
-        System.out.println(docId);
+//        System.out.println(docId);
         Document doc = documentRepository.findById(docId).get();
         String filepath = path + doc.getFilepath();
-        System.out.println(filepath);
+//        System.out.println(filepath);
         File file = new File(filepath+"_deviation.xlsx");
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        logger.info("Return downloadable document");
         return ResponseEntity.ok()
                 .headers(headers)
                 .contentLength(file.length())
@@ -64,19 +70,21 @@ public class FileController {
     }
 
     @GetMapping(path = "/processDoc/{docId}")
-    public Message processDoc(@PathVariable Long docId) throws IOException {
+    public Message processDoc(@PathVariable Long docId) throws Exception {
         Message message = new Message();
         Optional<Document> doc_opt = documentRepository.findById(docId);
         if (!doc_opt.isPresent()) {
             message.setData(documentRepository.findByFiletype(1));
             message.setStatus_code(-1);
             message.setMessage("Document does not exist.");
+            logger.error("Document does not exist.");
             return message;
         } else {
             Document doc = doc_opt.get();
             if (doc.getStatus() == 2) {
                 doc.setStatus(3);
                 documentRepository.save(doc);
+                logger.info("Start processing document");
                 fileProcessService.processDoc(doc);
             }
             message.setData(documentRepository.findByFiletype(1));
@@ -103,6 +111,7 @@ public class FileController {
 
         if (!file.isEmpty()) {
             try {
+                logger.info("Start uploading document");
                 byte[] bytes = file.getBytes();
                 BufferedOutputStream stream =
                         new BufferedOutputStream(new FileOutputStream(new File(filepath)));
@@ -124,29 +133,34 @@ public class FileController {
                 doc.setStatus(1);
                 documentRepository.save(doc);
                 if (fileType == 0) {
+                    logger.info("Start processing deviation document");
                     fileProcessService.processDev(doc);
                 } else {
+                    logger.info("Start splitting RFQ sentences");
                     fileProcessService.processDocSentence(doc);
                 }
 
                 Iterable<Document> docs = documentRepository.findByStatusAndFiletype(1, fileType);
                 message.setData(docs);
+                logger.info("File was uploaded successfully");
 
             } catch (Exception e) {
                 message.setStatus_code(-1);
                 message.setMessage("Failed! => " + e.getMessage());
+                logger.error(e.getMessage());
             }
         } else {
             message.setStatus_code(-1);
             message.setMessage("You failed to upload " + filename + " because the file was empty.");
+            logger.error("File was empty");
         }
 
-        System.out.println(filename);
-        System.out.println(fileUrl);
-        System.out.println(filepath);
-        System.out.println(fileType);
-        System.out.println(typeid);
-        System.out.println(threshold);
+//        System.out.println(filename);
+//        System.out.println(fileUrl);
+//        System.out.println(filepath);
+//        System.out.println(fileType);
+//        System.out.println(typeid);
+//        System.out.println(threshold);
 
         return message;
     }

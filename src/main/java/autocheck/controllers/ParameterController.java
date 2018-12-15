@@ -1,6 +1,8 @@
 package autocheck.controllers;
 
 import autocheck.models.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,12 +12,15 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping(path = "/api/parameters")
 public class ParameterController {
+    private static final Logger logger= LogManager.getLogger(ParameterController.class);
+
     @Autowired
     private ParameterRepository paraRepository;
 
     // Get type list
     @GetMapping
     public Iterable<Parameter> getParams() {
+        logger.info("Return parameters");
         return paraRepository.findAll();
     }
 
@@ -26,10 +31,12 @@ public class ParameterController {
         if (paraRepository.findByName(parameter.getName()).size() > 0) {
             message.setStatus_code(-1);
             message.setMessage("Parameter " + parameter.getName() + " already existed.");
+            logger.error("Parameter already existed");
         } else {
             paraRepository.save(parameter);
             message.setStatus_code(200);
             message.setMessage("Parameter " + parameter.getName() + " added.");
+            logger.info("New parameter added");
         }
         message.setData(paraRepository.findAll());
         return message;
@@ -45,9 +52,11 @@ public class ParameterController {
             paraRepository.save(this_param.get());
             message.setStatus_code(200);
             message.setMessage("Parameter " + parameter.getName() + " updated.");
+            logger.info("Update a parameter");
         } else {
             message.setStatus_code(-1);
             message.setMessage("Parameter " + parameter.getName() + " does not exist.");
+            logger.error("Parameter does not exist");
         }
         message.setData(paraRepository.findAll());
         return message;

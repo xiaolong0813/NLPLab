@@ -1,34 +1,35 @@
 package autocheck.services;
 
 import autocheck.models.*;
-//import edu.stanford.nlp.pipeline.CoreDocument;
-//import edu.stanford.nlp.pipeline.CoreSentence;
-//import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import com.google.common.collect.Iterables;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
+import org.apache.poi.xwpf.usermodel.XWPFSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.xm.similarity.text.CosineSimilarity;
-import org.xm.similarity.text.TextSimilarity;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @Service
 public class FileProcessService {
+    private static final Logger logger= LogManager.getLogger(FileProcessService.class);
+
     @Autowired
     private DocumentRepository documentRepository;
 
@@ -36,13 +37,19 @@ public class FileProcessService {
     private DeviationRepository deviationRepository;
 
     @Autowired
+    private ParameterRepository parameterRepository;
+
+    @Autowired
     private SentenceRepository sentenceRepository;
+
+    @Autowired
+    private ItemProcessService itemProcessService;
 
     private String path = "/Users/sefer/Documents/FDU/Lab/Project/Siemens/autocheck/file/";
 
     @Async
     public void processDev(Document doc) throws IOException {
-        System.out.println("Start processing deviation file " + doc.getFilename());
+        logger.info("Start processing deviation file " + doc.getFilename());
 
         String filepath = path + doc.getFilepath();
 
@@ -53,7 +60,7 @@ public class FileProcessService {
         // TODO: 新建 Deviation 表；确定表格格式；为每行记录1. 插入到 Devation 2. 确定相似匹配
         XSSFSheet sheet = wb.getSheetAt(0);
         XSSFRow row;
-        Integer rowNum = sheet.getPhysicalNumberOfRows();
+        int rowNum = sheet.getPhysicalNumberOfRows();
         Deviation dev;
 
         for (int i = 3; i < rowNum; ++i) {
@@ -73,21 +80,24 @@ public class FileProcessService {
 
         doc.setStatus(2);
         documentRepository.save(doc);
+        logger.info("Inserted " + (rowNum-3) + " deviation records");
     }
 
     @Async
     public void processDoc(Document doc) throws IOException {
-        System.out.println("Start processing document file " + doc.getFilename());
+        logger.info("Start processing RFQ document file " + doc.getFilename());
 
         String filepath = path + doc.getFilepath();
         String resultpath = filepath + "_deviation.xlsx";
+
+        int new_sentence_flag = parameterRepository.findByName("Check New Sentences").get(0).getValue().intValue();
 
         // Create Deviation Excel file
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet("Deviation");
         XSSFRow row;
         XSSFCell cell;
-        Integer rowNum = 0;
+        int rowNum = 0;
 
         //TODO 加上相似度得分
         // Add Headers
@@ -114,119 +124,92 @@ public class FileProcessService {
         // Get type devations and calculate TF-IDF
         Iterable<Deviation> devs = deviationRepository.findByType(doc.getType());
 
-        // Initialize Similarity
-        TextSimilarity similarity = new CosineSimilarity();
-        Double simValue, maxValue;
-        Integer startRow, endRow, maxStartRow;
-        String maxString, heading;
-
+        int dev_tot = Iterables.size(devs);
+        Collection<Future<List<String>>> results_dev = new ArrayList<>(dev_tot);
         for (Deviation dev: devs) {
-            System.out.println(dev.getId());
             String dev_text = dev.getContent();
             if (dev_text.length() == 0) continue;
-            StringBuilder doc_text = new StringBuilder();
-            startRow = 0;
-            endRow = 0;
+            results_dev.add(itemProcessService.findSimilarDev(dev.getContent(), dev.getD_content(), dev.getDev_type(), doc.getThreshold(), paragraphs));
+        }
 
-            maxStartRow = -1;
-            maxValue = 0.0;
-            maxString = "";
-            heading = "";
-
-            while (startRow < paragraphs.size()) {
-                while (endRow < paragraphs.size() && doc_text.toString().length() < dev_text.length()) {
-                    doc_text.append(paragraphs.get(endRow).getText());
-                    endRow += 1;
+        // wait for all threads
+        for (Future<List<String>> result: results_dev) {
+            try {
+                List<String> text_result = result.get();
+                if (text_result.size() != 0) {
+                    // Add to Excel
+                    row = sheet.createRow(rowNum);
+                    cell = row.createCell(0); // ID
+                    cell.setCellValue(rowNum);
+                    cell = row.createCell(1); // chapter
+                    cell.setCellValue(text_result.get(0));
+                    cell = row.createCell(2); // content
+                    cell.setCellValue(text_result.get(1));
+                    cell = row.createCell(3); // source_content
+                    cell.setCellValue(text_result.get(2));
+                    cell = row.createCell(4); // Dev_content
+                    cell.setCellValue(text_result.get(3));
+                    cell = row.createCell(5); // E/C
+                    cell.setCellValue(text_result.get(4));
+                    rowNum += 1;
+                    logger.info("Match a deviation record, total: " + (rowNum-1));
                 }
-                simValue = similarity.getSimilarity(doc_text.toString(), dev_text);
-                if (simValue > maxValue) {
-                    maxValue = simValue;
-                    maxStartRow = startRow;
-                    maxString = doc_text.toString();
-                }
-                startRow += 1;
-                endRow = startRow;
-                doc_text = new StringBuilder();
-            }
-
-            if (maxValue > doc.getThreshold()) {
-                // Get Heading
-                for (int i = maxStartRow; i > 0; --i) {
-                    if (paragraphs.get(i).getStyle() != null && paragraphs.get(i).getStyle().contains("Heading")) {
-                        heading = paragraphs.get(i).getText();
-                        break;
-                    }
-                }
-
-//                System.out.println(rowNum);
-//                System.out.println("DEV TEXT" + dev_text);
-//                System.out.println("DOC TEXT" + maxString);
-//                System.out.println("Heading" + heading);
-
-                // Add to Excel
-                row = sheet.createRow(rowNum);
-                cell = row.createCell(0); // ID
-                cell.setCellValue(rowNum+1);
-                cell = row.createCell(1); // chapter
-                cell.setCellValue(heading);
-                cell = row.createCell(2); // content
-                cell.setCellValue(maxString);
-                cell = row.createCell(3); // source_content
-                cell.setCellValue(dev_text);
-                cell = row.createCell(4); // Dev_content
-                cell.setCellValue(dev.getD_content());
-                cell = row.createCell(5); // E/C
-                cell.setCellValue(dev.getDev_type());
-                rowNum += 1;
+            } catch (InterruptedException | ExecutionException e) {
+                //handle thread error
             }
         }
 
-        // process new content
-        List<Sentence> new_sentences = sentenceRepository.findByDoc_id(doc.getId());
-        List<Sentence> old_sentences = sentenceRepository.findByTypeAndDoc_idIsNot(doc.getType(), doc.getId());
+        logger.info("Finished deviation processing");
 
-        boolean sen_flag;
-        for (Sentence sentence: new_sentences) {
-            sen_flag = false;
-            for (Sentence sentence1: old_sentences) {
-                simValue = similarity.getSimilarity(sentence.getText(), sentence1.getText());
-                if (simValue > 0.9) {
-                    sen_flag = true;
-                }
+        if (new_sentence_flag == 1) {
+            // process new content
+            logger.info("Start finding new sentences");
+            List<Sentence> new_sentences = sentenceRepository.findByDoc_id(doc.getId());
+            List<Sentence> old_sentences = sentenceRepository.findByTypeAndDoc_idIsNot(doc.getType(), doc.getId());
+
+            int sentence_tot = new_sentences.size();
+            Collection<Future<String>> results = new ArrayList<>(sentence_tot);
+            for (Sentence new_sentence : new_sentences) {
+                results.add(itemProcessService.checkSentence(new_sentence.getText(), old_sentences));
             }
-            if (!sen_flag) {
-//                System.out.println(rowNum);
-//                System.out.println("DEV TEXT: empty");
-//                System.out.println("DOC TEXT" + sentence.getText());
-//                System.out.println("Heading: empty");
 
-                // Add to Excel
-                row = sheet.createRow(rowNum);
-                cell = row.createCell(0); // ID
-                cell.setCellValue(rowNum+1);
-                cell = row.createCell(1); // chapter
-                cell.setCellValue("");
-                cell = row.createCell(2); // content
-                cell.setCellValue("");
-                cell = row.createCell(3); // source_content
-                cell.setCellValue(sentence.getText());
-                cell = row.createCell(4); // Dev_content
-                cell.setCellValue("");
-                cell = row.createCell(5); // E/C
-                cell.setCellValue("");
-                rowNum += 1;
+            // wait for all threads
+            for (Future<String> result: results) {
+                try {
+                    String new_text = result.get();
+                    if (!new_text.isEmpty()) {
+                        row = sheet.createRow(rowNum);
+                        cell = row.createCell(0); // ID
+                        cell.setCellValue(rowNum);
+                        cell = row.createCell(1); // chapter
+                        cell.setCellValue("");
+                        cell = row.createCell(2); // content
+                        cell.setCellValue("");
+                        cell = row.createCell(3); // source_content
+                        cell.setCellValue(new_text);
+                        cell = row.createCell(4); // Dev_content
+                        cell.setCellValue("");
+                        cell = row.createCell(5); // E/C
+                        cell.setCellValue("");
+                        rowNum += 1;
+                        logger.info("Find new sentence, total: " + (rowNum-1));
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    //handle thread error
+                    logger.error(e.getMessage());
+                }
             }
         }
 
         wb.write(new FileOutputStream(resultpath));
-
         doc.setStatus(4);
         documentRepository.save(doc);
+        logger.info("Finished RFQ document processing");
     }
 
     @Async
     public void processDocSentence(Document doc) throws IOException {
-        System.out.println("Start splitting document file " + doc.getFilename());
+        logger.info("Start splitting RFQ ocument file " + doc.getFilename());
 
 //        Properties props = new Properties();
 //        props.setProperty("annotators", "tokenize,ssplit");
@@ -242,7 +225,6 @@ public class FileProcessService {
         int tot = 0;
 
         for (XWPFParagraph paragraph: paragraphs) {
-//            if (paragraph.getRuns().get(0).isHighlighted()) continue;
             pruns = paragraph.getRuns();
             if (pruns.size() == 0 || pruns.get(0).isHighlighted()) continue;
             String p_text = paragraph.getText();
@@ -264,8 +246,8 @@ public class FileProcessService {
 //                tot++;
 //            }
         }
-        System.out.println("Finish splitting, the document has " + tot + " sentences.");
         doc.setStatus(2);
         documentRepository.save(doc);
+        logger.info("Finish splitting, the document has " + tot + " sentences.");
     }
 }
