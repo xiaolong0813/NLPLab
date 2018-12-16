@@ -37,6 +37,14 @@ public class FileController {
     @Autowired
     private FileProcessService fileProcessService;
 
+    private HttpHeaders getHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+        return headers;
+    }
+
     @GetMapping(path = "/getProcessing/{fileType}")
     public Iterable<Document> getProcessing(@PathVariable String fileType) {
         logger.info("Return documents under processing");
@@ -46,26 +54,34 @@ public class FileController {
     @GetMapping(path="/getAll/{fileType}")
     public Iterable<Document> getAll(@PathVariable String fileType) {
         logger.info("Return all the documents");
-        return documentRepository.findByFiletype(Integer.parseInt(fileType));
+        return documentRepository.findByFiletypeOrderByIdDesc(Integer.parseInt(fileType));
     }
 
-    @GetMapping(path = "/downloadDoc/{docId}")
-    public ResponseEntity<Resource> downloadDoc(@PathVariable Long docId) throws IOException{
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        headers.add("Pragma", "no-cache");
-        headers.add("Expires", "0");
-//        System.out.println(docId);
+    @GetMapping(path = "/downloadXlsx/{docId}")
+    public ResponseEntity<Resource> downloadXlsx(@PathVariable Long docId) throws IOException{
         Document doc = documentRepository.findById(docId).get();
         String filepath = path + doc.getFilepath();
-//        System.out.println(filepath);
         File file = new File(filepath+"_deviation.xlsx");
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
-        logger.info("Return downloadable document");
+        logger.info("Return downloadable xlsx document");
         return ResponseEntity.ok()
-                .headers(headers)
+                .headers(getHeaders())
                 .contentLength(file.length())
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(resource);
+    }
+
+    @GetMapping(path = "/downloadDocx/{docId}")
+    public ResponseEntity<Resource> downloadDocx(@PathVariable Long docId) throws IOException{
+        Document doc = documentRepository.findById(docId).get();
+        String filepath = path + doc.getFilepath();
+        File file = new File(filepath+"_new.docx");
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        logger.info("Return downloadable docx document");
+        return ResponseEntity.ok()
+                .headers(getHeaders())
+                .contentLength(file.length())
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
                 .body(resource);
     }
 
@@ -74,7 +90,7 @@ public class FileController {
         Message message = new Message();
         Optional<Document> doc_opt = documentRepository.findById(docId);
         if (!doc_opt.isPresent()) {
-            message.setData(documentRepository.findByFiletype(1));
+            message.setData(documentRepository.findByFiletypeOrderByIdDesc(1));
             message.setStatus_code(-1);
             message.setMessage("Document does not exist.");
             logger.error("Document does not exist.");
@@ -87,7 +103,7 @@ public class FileController {
                 logger.info("Start processing document");
                 fileProcessService.processDoc(doc);
             }
-            message.setData(documentRepository.findByFiletype(1));
+            message.setData(documentRepository.findByFiletypeOrderByIdDesc(1));
             message.setStatus_code(200);
             message.setMessage("Start processing document");
             return message;

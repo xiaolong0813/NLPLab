@@ -12,14 +12,15 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFSettings;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -89,6 +90,14 @@ public class FileProcessService {
 
         String filepath = path + doc.getFilepath();
         String resultpath = filepath + "_deviation.xlsx";
+        String resultDocPath = filepath + "_new.docx";
+
+        File newDocFile = new File(filepath);
+        XWPFDocument newDoc = new XWPFDocument(new FileInputStream(newDocFile));
+        newDoc.setTrackRevisions(true);
+        List<XWPFParagraph> newParagraphs = newDoc.getParagraphs();
+        XWPFParagraph newParagraph;
+        int startRow, endRow;
 
         int new_sentence_flag = parameterRepository.findByName("Check New Sentences").get(0).getValue().intValue();
 
@@ -133,6 +142,7 @@ public class FileProcessService {
         }
 
         // wait for all threads
+        String newParagraphText;
         for (Future<List<String>> result: results_dev) {
             try {
                 List<String> text_result = result.get();
@@ -151,6 +161,15 @@ public class FileProcessService {
                     cell.setCellValue(text_result.get(3));
                     cell = row.createCell(5); // E/C
                     cell.setCellValue(text_result.get(4));
+                    startRow = Integer.parseInt(text_result.get(5));
+                    endRow = Integer.parseInt(text_result.get(6));
+
+                    for (int p_idx = startRow; p_idx < endRow; ++p_idx) {
+                        newParagraph = newParagraphs.get(p_idx);
+                        for (XWPFRun pRun: newParagraph.getRuns()) {
+                            pRun.getCTR().addNewRPr().addNewHighlight().setVal(STHighlightColor.YELLOW);
+                        }
+                    }
                     rowNum += 1;
                     logger.info("Match a deviation record, total: " + (rowNum-1));
                 }
@@ -202,6 +221,7 @@ public class FileProcessService {
         }
 
         wb.write(new FileOutputStream(resultpath));
+        newDoc.write(new FileOutputStream(resultDocPath));
         doc.setStatus(4);
         documentRepository.save(doc);
         logger.info("Finished RFQ document processing");

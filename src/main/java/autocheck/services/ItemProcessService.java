@@ -66,7 +66,7 @@ public class ItemProcessService {
     public Future<List<String>> findSimilarDev(String dev_text, String dev_content, String dev_type, Double threshold, List<XWPFParagraph> paragraphs) {
 
         Double simValue, maxValue;
-        Integer startRow, endRow, maxStartRow;
+        Integer startRow, endRow, maxStartRow, maxEndRow;
         String maxString, heading;
         ArrayList<String> list = new ArrayList<>();
 
@@ -75,6 +75,7 @@ public class ItemProcessService {
         endRow = 0;
 
         maxStartRow = -1;
+        maxEndRow = -1;
         maxValue = 0.0;
         maxString = "";
         heading = "";
@@ -88,6 +89,7 @@ public class ItemProcessService {
             if (simValue > maxValue) {
                 maxValue = simValue;
                 maxStartRow = startRow;
+                maxEndRow = endRow;
                 maxString = doc_text.toString();
             }
             startRow += 1;
@@ -108,6 +110,8 @@ public class ItemProcessService {
             list.add(dev_text);
             list.add(dev_content);
             list.add(dev_type);
+            list.add(maxStartRow.toString());
+            list.add(maxEndRow.toString());
             return new AsyncResult<>(list);
         }
         return new AsyncResult<>(list);

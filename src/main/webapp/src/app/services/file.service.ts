@@ -39,9 +39,21 @@ export class FileService {
     return this.http.get<Message>(this.api+'processDoc/'+doc_id);
   }
 
-  downloadDoc(doc_id: number): Observable<Blob> {
-    return this.http.get(this.api+'downloadDoc/'+doc_id, {
+  downloadXlsx(doc_id: number): Observable<Blob> {
+    return this.http.get(this.api+'downloadXlsx/'+doc_id, {
       headers: {'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
+      responseType: 'blob'
+    }).pipe(
+      tap(
+        data => console.log(data),
+        error=> console.log(error)
+      )
+    );
+  }
+
+  downloadDocx(doc_id: number): Observable<Blob> {
+    return this.http.get(this.api+'downloadDocx/'+doc_id, {
+      headers: {'Accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'},
       responseType: 'blob'
     }).pipe(
       tap(

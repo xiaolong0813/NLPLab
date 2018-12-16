@@ -79,8 +79,16 @@ export class RfqComponent implements OnInit{
       })
   }
 
-  downloadDoc(doc_id: number) {
-    this.fileService.downloadDoc(doc_id)
+  downloadXlsx(doc_id: number) {
+    this.fileService.downloadXlsx(doc_id)
+      .subscribe(data => {
+        console.log("???");
+        saveAs(data);
+      });
+  }
+
+  downloadDocx(doc_id: number) {
+    this.fileService.downloadDocx(doc_id)
       .subscribe(data => {
         console.log("???");
         saveAs(data);
