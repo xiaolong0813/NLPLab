@@ -10,7 +10,7 @@
 ✓ Order documents by time descending
 ● When the paragraph is short, we should split the paragraph into sentences, and that will take more time.
 
-☐ Configuration file
+✓ Configuration file
 	database
 	filepath
 	async parameters

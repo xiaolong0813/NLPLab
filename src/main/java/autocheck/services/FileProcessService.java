@@ -11,16 +11,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.apache.poi.xwpf.usermodel.XWPFSettings;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,7 +43,8 @@ public class FileProcessService {
     @Autowired
     private ItemProcessService itemProcessService;
 
-    private String path = "/Users/sefer/Documents/FDU/Lab/Project/Siemens/autocheck/file/";
+    @Value("${file.path}")
+    private String path;
 
     @Async
     public void processDev(Document doc) throws IOException {

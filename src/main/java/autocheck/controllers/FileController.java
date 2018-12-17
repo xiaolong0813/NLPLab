@@ -5,6 +5,7 @@ import autocheck.services.FileProcessService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -26,7 +27,8 @@ import java.util.Optional;
 public class FileController {
     private static final Logger logger= LogManager.getLogger(FileController.class);
 
-    private String path = "/Users/sefer/Documents/FDU/Lab/Project/Siemens/autocheck/file/";
+    @Value("${file.path}")
+    private String path;
 
     @Autowired
     private DocumentRepository documentRepository;

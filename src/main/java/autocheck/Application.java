@@ -2,6 +2,7 @@ package autocheck;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -16,13 +17,22 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class Application {
     private static final Logger logger= LogManager.getLogger(Application.class);
 
+    @Value("${async.core-pool-size}")
+    private Integer corePoolSize;
+
+    @Value("${async.max-pool-size}")
+    private Integer maxPoolSize;
+
+    @Value("${async.queue-capacity}")
+    private Integer queueCapacity;
+
     @Bean
     public Executor asyncExecutor() {
         logger.info("Initialize async executor");
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(500);
-        executor.setMaxPoolSize(500);
-        executor.setQueueCapacity(500);
+        executor.setCorePoolSize(corePoolSize);
+        executor.setMaxPoolSize(maxPoolSize);
+        executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("Async-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
