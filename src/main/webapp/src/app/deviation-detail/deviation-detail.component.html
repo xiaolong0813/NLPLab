@@ -25,39 +25,39 @@
     </ng-template>
   </ngx-datatable-column>
 
-  <ngx-datatable-column name="Chapter">
+  <ngx-datatable-column name="Key Sentence">
     <ng-template let-column="column" ngx-datatable-header-template>
       {{ column.name }}
     </ng-template>
     <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-      {{ row.chapter }}
+      {{ row.rfq_keysent_cn }}
     </ng-template>
   </ngx-datatable-column>
 
-  <ngx-datatable-column name="Type">
-    <ng-template let-column="column" ngx-datatable-header-template>
-      {{ column.name }}
-    </ng-template>
-    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-      {{ row.type }}
-    </ng-template>
-  </ngx-datatable-column>
+  <!--<ngx-datatable-column name="Type">-->
+    <!--<ng-template let-column="column" ngx-datatable-header-template>-->
+      <!--{{ column.name }}-->
+    <!--</ng-template>-->
+    <!--<ng-template let-row="row" let-value="value" ngx-datatable-cell-template>-->
+      <!--{{ row.type }}-->
+    <!--</ng-template>-->
+  <!--</ngx-datatable-column>-->
 
-  <ngx-datatable-column name="E/C">
-    <ng-template let-column="column" ngx-datatable-header-template>
-      {{ column.name }}
-    </ng-template>
-    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-      {{ row.dev_type }}
-    </ng-template>
-  </ngx-datatable-column>
+  <!--<ngx-datatable-column name="E/C">-->
+    <!--<ng-template let-column="column" ngx-datatable-header-template>-->
+      <!--{{ column.name }}-->
+    <!--</ng-template>-->
+    <!--<ng-template let-row="row" let-value="value" ngx-datatable-cell-template>-->
+      <!--{{ row.dev_type }}-->
+    <!--</ng-template>-->
+  <!--</ngx-datatable-column>-->
 
-  <ngx-datatable-column name="Content">
+  <ngx-datatable-column name="RFQ Content">
     <ng-template let-column="column" ngx-datatable-header-template>
       {{ column.name }}
     </ng-template>
     <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-      {{ row.content }}
+      {{ row.rfq_content_cn }}
     </ng-template>
   </ngx-datatable-column>
 
@@ -66,7 +66,25 @@
       {{ column.name }}
     </ng-template>
     <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-      {{ row.d_content }}
+      {{ row.dev_content_cn }}
+    </ng-template>
+  </ngx-datatable-column>
+
+  <ngx-datatable-column name="Category">
+    <ng-template let-column="column" ngx-datatable-header-template>
+      {{ column.name }}
+    </ng-template>
+    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+      {{ row.category }}
+    </ng-template>
+  </ngx-datatable-column>
+
+  <ngx-datatable-column name="Team">
+    <ng-template let-column="column" ngx-datatable-header-template>
+      {{ column.name }}
+    </ng-template>
+    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+      {{ row.team }}
     </ng-template>
   </ngx-datatable-column>
 </ngx-datatable>

@@ -11,6 +11,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.impl.STAlignHImpl;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,10 +20,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 
 @Service
 public class FileProcessService {
@@ -41,10 +45,26 @@ public class FileProcessService {
     private SentenceRepository sentenceRepository;
 
     @Autowired
+    private TeamRepository teamRepository;
+
+    @Autowired
     private ItemProcessService itemProcessService;
 
     @Value("${file.path}")
     private String path;
+
+    private List<STHighlightColor.Enum> colorArray = Arrays.asList(
+            STHighlightColor.YELLOW,
+            STHighlightColor.BLUE,
+            STHighlightColor.CYAN,
+            STHighlightColor.GREEN,
+            STHighlightColor.RED,
+            STHighlightColor.MAGENTA,
+            STHighlightColor.LIGHT_GRAY,
+            STHighlightColor.DARK_CYAN,
+            STHighlightColor.DARK_YELLOW,
+            STHighlightColor.DARK_BLUE
+            );
 
     @Async
     public void processDev(Document doc) throws IOException {
@@ -56,34 +76,61 @@ public class FileProcessService {
         File file = new File(filepath);
         XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(file));
 
-        // TODO: 新建 Deviation 表；确定表格格式；为每行记录1. 插入到 Devation 2. 确定相似匹配
         XSSFSheet sheet = wb.getSheetAt(0);
         XSSFRow row;
         int rowNum = sheet.getPhysicalNumberOfRows();
         Deviation dev;
+        String team_name;
 
-        for (int i = 3; i < rowNum; ++i) {
+        for (int i = 1; i < rowNum; ++i) {
             row = sheet.getRow(i);
             dev = new Deviation();
             dev.setDoc_id(doc.getId());
-            dev.setChapter(row.getCell(2).getStringCellValue());
-            dev.setType(doc.getType());
-            dev.setDev_type(row.getCell(3).getStringCellValue());
-            dev.setContent(row.getCell(4).getStringCellValue());
-            dev.setD_content(row.getCell(5).getStringCellValue());
-            // TODO 确定相似匹配
-            dev.setGroup_id(0L);
-            dev.setStatus(0);
+
+            dev.setChapter_var_a(row.getCell(1, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setChapter_var_b(row.getCell(2, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setChapter_var_c(row.getCell(3, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setChapter_var_d(row.getCell(4, CREATE_NULL_AS_BLANK).getStringCellValue());
+
+            dev.setRfq_content_cn(row.getCell(5, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setRfq_keysent_cn(row.getCell(6, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setDev_content_cn(row.getCell(7, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setContract_wording_cn(row.getCell(8, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setRfq_content_en(row.getCell(9, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setCategory(row.getCell(10, CREATE_NULL_AS_BLANK).getStringCellValue());
+
+            dev.setCost_1(row.getCell(11, CREATE_NULL_AS_BLANK).getNumericCellValue());
+            dev.setCost_2(row.getCell(12, CREATE_NULL_AS_BLANK).getNumericCellValue());
+            dev.setCost_3(row.getCell(13, CREATE_NULL_AS_BLANK).getNumericCellValue());
+            dev.setCost_4(row.getCell(14, CREATE_NULL_AS_BLANK).getNumericCellValue());
+            dev.setCost_5(row.getCell(15, CREATE_NULL_AS_BLANK).getNumericCellValue());
+
+            team_name = row.getCell(16, CREATE_NULL_AS_BLANK).getStringCellValue();
+            List<Team> this_team = teamRepository.findByName(team_name);
+            if (this_team.size() == 0) {
+                Team team = new Team();
+                team.setName(team_name);
+                teamRepository.save(team);
+            }
+            dev.setTeam(team_name);
+            dev.setLink_support_doc(row.getCell(17, CREATE_NULL_AS_BLANK).getStringCellValue());
+
+            dev.setSpare_1(row.getCell(18, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setSpare_2(row.getCell(19, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setSpare_3(row.getCell(20, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setSpare_4(row.getCell(21, CREATE_NULL_AS_BLANK).getStringCellValue());
+            dev.setSpare_5(row.getCell(22, CREATE_NULL_AS_BLANK).getStringCellValue());
+
             deviationRepository.save(dev);
         }
 
         doc.setStatus(2);
         documentRepository.save(doc);
-        logger.info("Inserted " + (rowNum-3) + " deviation records");
+        logger.info("Inserted " + (rowNum-1) + " deviation records");
     }
 
     @Async
-    public void processDoc(Document doc) throws IOException {
+    public void processDoc(Document doc, Integer model, Integer rfqVar, Integer simAlgo) throws IOException {
         logger.info("Start processing RFQ document file " + doc.getFilename());
 
         String filepath = path + doc.getFilepath();
@@ -106,21 +153,28 @@ public class FileProcessService {
         XSSFCell cell;
         int rowNum = 0;
 
-        //TODO 加上相似度得分
         // Add Headers
         row = sheet.createRow(rowNum);
         cell = row.createCell(0); // ID
         cell.setCellValue("ID");
         cell = row.createCell(1); // chapter
         cell.setCellValue("Chapter");
-        cell = row.createCell(2); // content
-        cell.setCellValue("New content");
-        cell = row.createCell(3); // source_content
-        cell.setCellValue("Source content");
+        cell = row.createCell(2); // source_content
+        cell.setCellValue("Old RFQ content");
+        cell = row.createCell(3); // new RFQ
+        cell.setCellValue("New RFQ content");
         cell = row.createCell(4); // Dev_content
-        cell.setCellValue("Source deviation");
-        cell = row.createCell(5); // E/C
-        cell.setCellValue("E/C");
+        cell.setCellValue("Deviation");
+        cell = row.createCell(5); // Category
+        cell.setCellValue("Category");
+        cell = row.createCell(6); // Cost
+        cell.setCellValue("Cost impact in kEUR for 2 units");
+        cell = row.createCell(7); // Team
+        cell.setCellValue("Team");
+        cell = row.createCell(8); // link
+        cell.setCellValue("Supporting document link");
+        cell = row.createCell(9); // Match Value
+        cell.setCellValue("Match value");
         rowNum += 1;
 
         // Process Document
@@ -129,14 +183,12 @@ public class FileProcessService {
         List<XWPFParagraph> paragraphs = document.getParagraphs();
 
         // Get type devations and calculate TF-IDF
-        Iterable<Deviation> devs = deviationRepository.findByType(doc.getType());
+        Iterable<Deviation> devs = deviationRepository.findAll();
 
         int dev_tot = Iterables.size(devs);
         Collection<Future<List<String>>> results_dev = new ArrayList<>(dev_tot);
         for (Deviation dev: devs) {
-            String dev_text = dev.getContent();
-            if (dev_text.length() == 0) continue;
-            results_dev.add(itemProcessService.findSimilarDev(dev.getContent(), dev.getD_content(), dev.getDev_type(), doc.getThreshold(), paragraphs));
+            results_dev.add(itemProcessService.findSimilarDev(dev, paragraphs, model, rfqVar, simAlgo));
         }
 
         // wait for all threads
@@ -149,23 +201,34 @@ public class FileProcessService {
                     row = sheet.createRow(rowNum);
                     cell = row.createCell(0); // ID
                     cell.setCellValue(rowNum);
-                    cell = row.createCell(1); // chapter
+                    cell = row.createCell(1);
                     cell.setCellValue(text_result.get(0));
-                    cell = row.createCell(2); // content
+                    cell = row.createCell(2);
                     cell.setCellValue(text_result.get(1));
-                    cell = row.createCell(3); // source_content
+                    cell = row.createCell(3);
                     cell.setCellValue(text_result.get(2));
-                    cell = row.createCell(4); // Dev_content
+                    cell = row.createCell(4);
                     cell.setCellValue(text_result.get(3));
-                    cell = row.createCell(5); // E/C
+                    cell = row.createCell(5);
                     cell.setCellValue(text_result.get(4));
-                    startRow = Integer.parseInt(text_result.get(5));
-                    endRow = Integer.parseInt(text_result.get(6));
+                    cell = row.createCell(6);
+                    cell.setCellValue(text_result.get(5));
+                    cell = row.createCell(7);
+                    cell.setCellValue(text_result.get(6));
+                    cell = row.createCell(8);
+                    cell.setCellValue(text_result.get(7));
+                    cell = row.createCell(9);
+                    cell.setCellValue(text_result.get(8));
+
+                    startRow = Integer.parseInt(text_result.get(9));
+                    endRow = Integer.parseInt(text_result.get(10));
+
+                    Long team_id = teamRepository.findByName(text_result.get(6)).get(0).getId();
 
                     for (int p_idx = startRow; p_idx < endRow; ++p_idx) {
                         newParagraph = newParagraphs.get(p_idx);
                         for (XWPFRun pRun: newParagraph.getRuns()) {
-                            pRun.getCTR().addNewRPr().addNewHighlight().setVal(STHighlightColor.YELLOW);
+                            pRun.getCTR().addNewRPr().addNewHighlight().setVal(colorArray.get(team_id.intValue()));
                         }
                     }
                     rowNum += 1;
@@ -182,7 +245,7 @@ public class FileProcessService {
             // process new content
             logger.info("Start finding new sentences");
             List<Sentence> new_sentences = sentenceRepository.findByDoc_id(doc.getId());
-            List<Sentence> old_sentences = sentenceRepository.findByTypeAndDoc_idIsNot(doc.getType(), doc.getId());
+            List<Sentence> old_sentences = sentenceRepository.findByDoc_idIsNot(doc.getId());
 
             int sentence_tot = new_sentences.size();
             Collection<Future<String>> results = new ArrayList<>(sentence_tot);
@@ -198,15 +261,23 @@ public class FileProcessService {
                         row = sheet.createRow(rowNum);
                         cell = row.createCell(0); // ID
                         cell.setCellValue(rowNum);
-                        cell = row.createCell(1); // chapter
+                        cell = row.createCell(1);
                         cell.setCellValue("");
-                        cell = row.createCell(2); // content
+                        cell = row.createCell(2);
                         cell.setCellValue("");
-                        cell = row.createCell(3); // source_content
+                        cell = row.createCell(3);
                         cell.setCellValue(new_text);
-                        cell = row.createCell(4); // Dev_content
+                        cell = row.createCell(4);
                         cell.setCellValue("");
-                        cell = row.createCell(5); // E/C
+                        cell = row.createCell(5);
+                        cell.setCellValue("");
+                        cell = row.createCell(6);
+                        cell.setCellValue("");
+                        cell = row.createCell(7);
+                        cell.setCellValue("");
+                        cell = row.createCell(8);
+                        cell.setCellValue("");
+                        cell = row.createCell(9);
                         cell.setCellValue("");
                         rowNum += 1;
                         logger.info("Find new sentence, total: " + (rowNum-1));
@@ -248,7 +319,7 @@ public class FileProcessService {
             String p_text = paragraph.getText();
             Sentence sentence1 = new Sentence();
             sentence1.setDoc_id(doc.getId());
-            sentence1.setType(doc.getType());
+//            sentence1.setType(doc.getType());
             sentence1.setText(p_text);
             sentenceRepository.save(sentence1);
             tot++;

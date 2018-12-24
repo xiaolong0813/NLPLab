@@ -21,8 +21,8 @@ public class ItemProcessService {
     @Autowired
     private ParameterRepository parameterRepository;
 
-    private Double getSimValue(String sent1, String sent2) {
-        int similarity_flag = parameterRepository.findByName("Similarity Algorithm").get(0).getValue().intValue();
+    private Double getSimValue(String sent1, String sent2, Integer similarity_flag) {
+//        int similarity_flag = parameterRepository.findByName("Similarity Algorithm").get(0).getValue().intValue();
         TextSimilarity similarity;
         switch (similarity_flag) {
             case 0:
@@ -63,8 +63,7 @@ public class ItemProcessService {
     }
 
     @Async
-    public Future<List<String>> findSimilarDev(String dev_text, String dev_content, String dev_type, Double threshold, List<XWPFParagraph> paragraphs) {
-
+    public Future<List<String>> findSimilarDev(Deviation dev, List<XWPFParagraph> paragraphs, Integer model, Integer rfqVar, Integer simAlgo) {
         Double simValue, maxValue;
         Integer startRow, endRow, maxStartRow, maxEndRow;
         String maxString, heading;
@@ -80,12 +79,14 @@ public class ItemProcessService {
         maxString = "";
         heading = "";
 
+        String dev_text = dev.getRfq_content_cn();
+
         while (startRow < paragraphs.size()) {
             while (endRow < paragraphs.size() && doc_text.toString().length() < dev_text.length()) {
                 doc_text.append(paragraphs.get(endRow).getText());
                 endRow += 1;
             }
-            simValue = getSimValue(doc_text.toString(), dev_text);
+            simValue = getSimValue(doc_text.toString(), dev_text, simAlgo);
             if (simValue > maxValue) {
                 maxValue = simValue;
                 maxStartRow = startRow;
@@ -96,25 +97,49 @@ public class ItemProcessService {
             endRow = startRow;
             doc_text = new StringBuilder();
         }
-
-        if (maxValue > threshold) {
-            // Get Heading
-            for (int i = maxStartRow; i > 0; --i) {
-                if (paragraphs.get(i).getStyle() != null && paragraphs.get(i).getStyle().contains("Heading")) {
-                    heading = paragraphs.get(i).getText();
-                    break;
-                }
+        // Get Heading
+        for (int i = maxStartRow; i > 0; --i) {
+            if (paragraphs.get(i).getStyle() != null && paragraphs.get(i).getStyle().contains("Heading")) {
+                heading = paragraphs.get(i).getText();
+                break;
             }
-            list.add(heading);
-            list.add(maxString);
-            list.add(dev_text);
-            list.add(dev_content);
-            list.add(dev_type);
-            list.add(maxStartRow.toString());
-            list.add(maxEndRow.toString());
-            return new AsyncResult<>(list);
         }
+        list.add(heading);
+        list.add(dev_text);
+        list.add(maxString);
+        list.add(dev.getDev_content_cn());
+        list.add(dev.getCategory());
+        switch (model) {
+            case 0:
+                list.add(dev.getCost_1().toString());
+                break;
+            case 1:
+                list.add(dev.getCost_2().toString());
+                break;
+            case 2:
+                list.add(dev.getCost_3().toString());
+                break;
+            case 3:
+                list.add(dev.getCost_4().toString());
+                break;
+            case 4:
+                list.add(dev.getCost_5().toString());
+                break;
+            default:
+                list.add(dev.getCost_1().toString());
+        }
+        list.add(dev.getTeam());
+        list.add(dev.getLink_support_doc());
+        list.add(maxValue.toString());
+
+        list.add(maxStartRow.toString());
+        list.add(maxEndRow.toString());
         return new AsyncResult<>(list);
+
+//        if (maxValue > threshold) {
+//
+//        }
+//        return new AsyncResult<>(list);
     }
 
 
@@ -122,7 +147,7 @@ public class ItemProcessService {
     public Future<String> checkSentence(String new_sentence, List<Sentence> old_sentences) {
         Double simValue;
         for (Sentence sentence: old_sentences) {
-            simValue = getSimValue(new_sentence, sentence.getText());
+            simValue = getSimValue(new_sentence, sentence.getText(), 4);
             if (simValue > 0.9) {
                 return new AsyncResult<>("");
             }

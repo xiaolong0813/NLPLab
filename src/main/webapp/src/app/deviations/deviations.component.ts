@@ -17,34 +17,35 @@ import { ParameterService } from "../services/parameter.service";
 })
 export class DeviationsComponent implements OnInit{
   types: Type[];
-  defaultThreshold: number;
+  // defaultThreshold: number;
 
   modalRef: BsModalRef;
   constructor(private modalService: BsModalService, private typeService: TypeService, private paramService: ParameterService) {}
 
   ngOnInit() {
-    this.getTypes();
-    this.getParams();
+    // this.getTypes();
+    // this.getParams();
   }
 
-  getTypes(): void {
-    this.typeService.getTypes()
-      .subscribe(types => this.types = types)
-  }
-
-  getParams(): void {
-    this.paramService.getParameters()
-      .subscribe(params=>{
-        this.defaultThreshold = params[0].value;
-      })
-  }
+  // getTypes(): void {
+  //   this.typeService.getTypes()
+  //     .subscribe(types => this.types = types)
+  // }
+  //
+  // getParams(): void {
+  //   this.paramService.getParameters()
+  //     .subscribe(params=>{
+  //       this.defaultThreshold = params[0].value;
+  //     })
+  // }
 
   openModelWithComponent() {
     const initialState = {
       title: 'Upload deviation file',
-      thresholdName: 'Group threshold',
-      defaultThreshold: this.defaultThreshold,
-      types: this.types
+      filetype: 'deviation'
+      // thresholdName: 'Group threshold',
+      // defaultThreshold: this.defaultThreshold,
+      // types: this.types
     };
     this.modalRef = this.modalService.show(ModalContentComponent, {initialState});
   }

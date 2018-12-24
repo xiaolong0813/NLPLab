@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpHeaders, HttpResponse} from "@angular/common/http";
+import {HttpClient, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 
 import { Observable, of } from 'rxjs';
 
@@ -35,8 +35,15 @@ export class FileService {
     return this.http.get<Document[]>(this.api+'getAll/'+fileType);
   }
 
-  processDoc(doc_id: number): Observable<Message> {
-    return this.http.get<Message>(this.api+'processDoc/'+doc_id);
+  processDoc(doc_id: number, model: number, rfqvar: number, simalgo: number): Observable<Message> {
+    return this.http.get<Message>(this.api+'processDoc/', {
+      params: {
+        'doc_id': doc_id.toString(),
+        'model': model.toString(),
+        'rfqvar': rfqvar.toString(),
+        'simalgo': simalgo.toString()
+      }
+    });
   }
 
   downloadXlsx(doc_id: number): Observable<Blob> {

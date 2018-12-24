@@ -33,8 +33,8 @@ public class FileController {
     @Autowired
     private DocumentRepository documentRepository;
 
-    @Autowired
-    private TypeRepository typeRepository;
+//    @Autowired
+//    private TypeRepository typeRepository;
 
     @Autowired
     private FileProcessService fileProcessService;
@@ -87,8 +87,16 @@ public class FileController {
                 .body(resource);
     }
 
-    @GetMapping(path = "/processDoc/{docId}")
-    public Message processDoc(@PathVariable Long docId) throws Exception {
+    @GetMapping(path = "/processDoc/")
+    public Message processDoc(@RequestParam("doc_id") String doc_id_str,
+                              @RequestParam("model") String model_str,
+                              @RequestParam("rfqvar") String rfqvar_str,
+                              @RequestParam("simalgo") String simalgo_str) throws Exception {
+        Long docId = Long.parseLong(doc_id_str);
+        Integer model = Integer.parseInt(model_str);
+        Integer rfqVar = Integer.parseInt(rfqvar_str);
+        Integer simAlgo = Integer.parseInt(simalgo_str);
+
         Message message = new Message();
         Optional<Document> doc_opt = documentRepository.findById(docId);
         if (!doc_opt.isPresent()) {
@@ -103,7 +111,7 @@ public class FileController {
                 doc.setStatus(3);
                 documentRepository.save(doc);
                 logger.info("Start processing document");
-                fileProcessService.processDoc(doc);
+                fileProcessService.processDoc(doc, model, rfqVar, simAlgo);
             }
             message.setData(documentRepository.findByFiletypeOrderByIdDesc(1));
             message.setStatus_code(200);
@@ -124,8 +132,8 @@ public class FileController {
         String filepath = path + fileUrl;
 
         Integer fileType = Integer.parseInt(params.getParameter("fileType"));
-        Long typeid = Long.parseLong(params.getParameter("type"));
-        Double threshold = Double.parseDouble(params.getParameter("threshold"));
+//        Long typeid = Long.parseLong(params.getParameter("type"));
+//        Double threshold = Double.parseDouble(params.getParameter("threshold"));
 
         if (!file.isEmpty()) {
             try {
@@ -142,10 +150,10 @@ public class FileController {
                 doc.setFilename(filename);
                 doc.setFilepath(fileUrl);
                 doc.setFiletype(fileType);
-                Type type = typeRepository.findById(typeid).get();
-                doc.setType(type.getName());
+//                Type type = typeRepository.findById(typeid).get();
+//                doc.setType(type.getName());
                 doc.setStatus(0);
-                doc.setThreshold(threshold);
+//                doc.setThreshold(threshold);
                 documentRepository.save(doc);
 
                 doc.setStatus(1);

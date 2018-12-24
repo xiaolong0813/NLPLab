@@ -20,20 +20,20 @@ import { FileService  } from "../services/file.service";
             <label class="col-form-label">File:</label>
             <input type="file" class="form-control-file" (change)="handleFileInput($event.target.files)">
           </div>
-          <div class="form-group">
-            <label class="col-form-label">Type:</label>
-            <ng-select [items]="types"
-                       bindLabel="name"
-                       bindValue="id"
-                       placeholder="Select Type"
-                       [(ngModel)]="selectedTypeId"
-                       class="form-control">
-            </ng-select>
-          </div>
-          <div *ngIf="thresholdName != 'Group threshold'"  class="form-group">
-            <label class="col-form-label">{{ thresholdName }}: {{ defaultThreshold }}</label>
-            <input type="range" class="custom-range" min="0" max="1" step="0.1" value="{{ defaultThreshold }}" [(ngModel)]="defaultThreshold">
-          </div>
+          <!--<div class="form-group">-->
+            <!--<label class="col-form-label">Type:</label>-->
+            <!--<ng-select [items]="types"-->
+                       <!--bindLabel="name"-->
+                       <!--bindValue="id"-->
+                       <!--placeholder="Select Type"-->
+                       <!--[(ngModel)]="selectedTypeId"-->
+                       <!--class="form-control">-->
+            <!--</ng-select>-->
+          <!--</div>-->
+          <!--<div *ngIf="thresholdName != 'Group threshold'"  class="form-group">-->
+            <!--<label class="col-form-label">{{ thresholdName }}: {{ defaultThreshold }}</label>-->
+            <!--<input type="range" class="custom-range" min="0" max="1" step="0.1" value="{{ defaultThreshold }}" [(ngModel)]="defaultThreshold">-->
+          <!--</div>-->
         </div>
       </div>
       <div class="modal-footer">
@@ -45,18 +45,19 @@ import { FileService  } from "../services/file.service";
 
 export class ModalContentComponent {
   title: string;
-  thresholdName: string;
-  defaultThreshold = 0.8;
+  filetype: string;
+  // thresholdName: string;
+  // defaultThreshold = 0.8;
   fileToUpload: File = null;
   formData: FormData = new FormData();
-  selectedTypeId: number = 0;
+  // selectedTypeId: number = 0;
 
   constructor(public modalRef: BsModalRef, private messageService: MessageService, private fileService: FileService) {}
 
   closeModal() {
     this.formData = new FormData();
     this.fileToUpload = null;
-    this.selectedTypeId = 0;
+    // this.selectedTypeId = 0;
     this.modalRef.hide();
   }
 
@@ -69,11 +70,11 @@ export class ModalContentComponent {
       this.messageService.new_alert(-1, "Please select file first.");
       return;
     }
-    if (this.selectedTypeId == 0 || this.selectedTypeId == null) {
-      this.messageService.new_alert(-1, "Please select file type.");
-      return;
-    }
-    if (this.thresholdName == 'Group threshold') {
+    // if (this.selectedTypeId == 0 || this.selectedTypeId == null) {
+    //   this.messageService.new_alert(-1, "Please select file type.");
+    //   return;
+    // }
+    if (this.filetype == 'deviation') {
       //  Upload deviation file
       if (this.fileToUpload.type != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
         this.messageService.new_alert(-1, "Please upload a file with .xlsx extension.");
@@ -81,8 +82,8 @@ export class ModalContentComponent {
       }
       this.formData.append("file", this.fileToUpload, this.fileToUpload.name);
       this.formData.append("fileType", "0");
-      this.formData.append("type", this.selectedTypeId.toString());
-      this.formData.append("threshold", this.defaultThreshold.toString());
+      // this.formData.append("type", this.selectedTypeId.toString());
+      // this.formData.append("threshold", this.defaultThreshold.toString());
 
       this.fileService.uploadFiles(this.formData)
         .subscribe(message=> {
@@ -103,8 +104,8 @@ export class ModalContentComponent {
       }
       this.formData.append("file", this.fileToUpload, this.fileToUpload.name);
       this.formData.append("fileType", "1");
-      this.formData.append("type", this.selectedTypeId.toString());
-      this.formData.append("threshold", this.defaultThreshold.toString());
+      // this.formData.append("type", this.selectedTypeId.toString());
+      // this.formData.append("threshold", this.defaultThreshold.toString());
       this.fileService.uploadFiles(this.formData)
         .subscribe(message=> {
           if (message.status_code == 200) {

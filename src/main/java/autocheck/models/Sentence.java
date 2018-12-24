@@ -11,7 +11,7 @@ public class Sentence {
     @GenericGenerator(name = "native", strategy = "native")
     private Long id;
 
-    private String type;
+//    private String type;
     private Long doc_id;
 
     @Column(columnDefinition = "TEXT")
@@ -25,13 +25,13 @@ public class Sentence {
         this.id = id;
     }
 
-    public String getType() {
-        return type;
-    }
+//    public String getType() {
+//        return type;
+//    }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+//    public void setType(String type) {
+//        this.type = type;
+//    }
 
     public Long getDoc_id() {
         return doc_id;

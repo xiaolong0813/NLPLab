@@ -10,8 +10,9 @@ import { HelpComponent } from "./help/help.component";
 const routes: Routes = [
   { path: '', redirectTo: '/index', pathMatch: 'full' },
   { path: 'index', component: IndexComponent },
-  { path: 'devlist', redirectTo:'/devlist/0', pathMatch: 'full' },
-  { path: 'devlist/:type', component: DeviationsComponent},
+  { path: 'devlist', component: DeviationsComponent},
+  // { path: 'devlist', redirectTo:'/devlist/0', pathMatch: 'full' },
+  // { path: 'devlist/:type', component: DeviationsComponent},
   { path: 'rfq', component: RfqComponent },
   { path: 'settings', component: SettingsComponent },
   { path: 'help', component: HelpComponent }

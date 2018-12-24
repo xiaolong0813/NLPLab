@@ -1,17 +1,17 @@
 <button type="button" class="btn btn-info" (click)="openModelWithComponent()">Upload</button>
 <hr>
 <div class="row">
-  <div class="col-2">
-    <div class="list-group">
-      <a class="list-group-item list-group-item-action" routerLinkActive="active" routerLink="/devlist/0">
-        All
-      </a>
-      <a class="list-group-item list-group-item-action" *ngFor="let item of types" routerLinkActive="active" routerLink="/devlist/{{ item.id }}">
-        {{ item.name }}
-      </a>
-    </div>
-  </div>
-  <div class="col-10">
+  <!--<div class="col-2">-->
+    <!--<div class="list-group">-->
+      <!--<a class="list-group-item list-group-item-action" routerLinkActive="active" routerLink="/devlist/0">-->
+        <!--All-->
+      <!--</a>-->
+      <!--<a class="list-group-item list-group-item-action" *ngFor="let item of types" routerLinkActive="active" routerLink="/devlist/{{ item.id }}">-->
+        <!--{{ item.name }}-->
+      <!--</a>-->
+    <!--</div>-->
+  <!--</div>-->
+  <div class="col-12">
     <div class="tab-content">
       <app-deviation-detail></app-deviation-detail>
     </div>

@@ -14,9 +14,9 @@ public class Document {
     private String filename;
     private String filepath;
     private Integer filetype; // 0 is deviation, 1 is rfq;
-    private String type;
+//    private String type;
     private Integer status;
-    private Double threshold;
+//    private Double threshold;
 
     public Long getId() {
         return id;
@@ -50,13 +50,13 @@ public class Document {
         this.status = status;
     }
 
-    public Double getThreshold() {
-        return threshold;
-    }
+//    public Double getThreshold() {
+//        return threshold;
+//    }
 
-    public void setThreshold(Double threshold) {
-        this.threshold = threshold;
-    }
+//    public void setThreshold(Double threshold) {
+//        this.threshold = threshold;
+//    }
 
     public Integer getFiletype() {
         return filetype;
@@ -66,11 +66,11 @@ public class Document {
         this.filetype = filetype;
     }
 
-    public String getType() {
-        return type;
-    }
+//    public String getType() {
+//        return type;
+//    }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+//    public void setType(String type) {
+//        this.type = type;
+//    }
 }

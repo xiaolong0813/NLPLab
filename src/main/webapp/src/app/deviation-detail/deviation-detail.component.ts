@@ -11,18 +11,18 @@ import {DeviationService} from "../services/deviation.service";
   styleUrls: [ './deviation-detail.component.scss' ]
 })
 export class DeviationDetailComponent implements OnInit{
-  public typeId: number;
+  // public typeId: number;
   public devs: Deviation[];
 
   constructor(private route: ActivatedRoute, private fileService: FileService, private deviationService: DeviationService) {
-    route.params.subscribe(params => {
-      this.typeId = +params['type'];
-      this.getDevs();
-    }, )
+    // route.params.subscribe(params => {
+      // this.typeId = +params['type'];
+      // this.getDevs();
+    // }, )
   }
 
   ngOnInit(): void {
-    this.typeId = +this.route.snapshot.paramMap.get('type');
+    // this.typeId = +this.route.snapshot.paramMap.get('type');
     this.getDevs();
     this.fileService.getProcessingFiles(0)
       .subscribe(data=> {
@@ -34,7 +34,7 @@ export class DeviationDetailComponent implements OnInit{
   }
 
   getDevs(): void {
-    this.deviationService.getDevs(this.typeId)
+    this.deviationService.getDevs()
       .subscribe(devs => this.devs = devs);
   }
 }

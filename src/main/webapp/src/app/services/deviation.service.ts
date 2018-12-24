@@ -17,7 +17,7 @@ export class DeviationService {
     private http:HttpClient
   ) { }
 
-  getDevs(type: number):Observable<Deviation[]> {
-    return this.http.get<Deviation[]>(this.api+'getDevs/'+type);
+  getDevs():Observable<Deviation[]> {
+    return this.http.get<Deviation[]>(this.api+'getDevs');
   }
 }

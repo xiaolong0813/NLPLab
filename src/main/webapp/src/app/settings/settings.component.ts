@@ -14,8 +14,8 @@ import { Parameter } from "../parameter";
 })
 
 export class SettingsComponent implements OnInit{
-  groupThreshold: Parameter;
-  matchupThreshold: Parameter;
+  // groupThreshold: Parameter;
+  // matchupThreshold: Parameter;
   checkNewSentences: Parameter;
   similarityAlgorithm: Parameter;
   similarityAlgorithmArray: object;
@@ -40,73 +40,73 @@ export class SettingsComponent implements OnInit{
       {"id":10, "value":"SimHash + 汉明距离"},
       {"id":11, "value":"Sørensen–Dice系数"}
       ];
-    this.getTypes();
+    // this.getTypes();
     this.getParams();
   }
 
-  getTypes(): void {
-    this.typeService.getTypes()
-      .subscribe(types => this.types = types)
-  }
-
-  addType(typeName: string): void {
-    typeName = typeName.trim();
-    if (!typeName) { return; }
-
-    let new_type = {
-      "name": typeName
-    };
-    this.typeService.addType(new_type as Type)
-      .subscribe(message => {
-        this.types = message.data as Type[];
-        this.messageService.new_alert(message.status_code, message.message);
-      }
-    )
-  }
-
-  deleteType(typeId: number): void {
-    if (confirm("Are you sure? This operation will remove all the relevant deviation records.")) {
-      this.typeService.deleteType(typeId)
-        .subscribe(message=>{
-          this.types = message.data as Type[];
-          this.messageService.new_alert(message.status_code, message.message);
-        })
-    }
-  }
+  // getTypes(): void {
+  //   this.typeService.getTypes()
+  //     .subscribe(types => this.types = types)
+  // }
+  //
+  // addType(typeName: string): void {
+  //   typeName = typeName.trim();
+  //   if (!typeName) { return; }
+  //
+  //   let new_type = {
+  //     "name": typeName
+  //   };
+  //   this.typeService.addType(new_type as Type)
+  //     .subscribe(message => {
+  //       this.types = message.data as Type[];
+  //       this.messageService.new_alert(message.status_code, message.message);
+  //     }
+  //   )
+  // }
+  //
+  // deleteType(typeId: number): void {
+  //   if (confirm("Are you sure? This operation will remove all the relevant deviation records.")) {
+  //     this.typeService.deleteType(typeId)
+  //       .subscribe(message=>{
+  //         this.types = message.data as Type[];
+  //         this.messageService.new_alert(message.status_code, message.message);
+  //       })
+  //   }
+  // }
 
   getParams():void {
     this.paramService.getParameters()
       .subscribe(params=>{
-        this.groupThreshold = params[0];
-        this.matchupThreshold = params[1];
-        this.checkNewSentences = params[2];
-        this.similarityAlgorithm = params[3];
+        // this.groupThreshold = params[0];
+        // this.matchupThreshold = params[1];
+        this.checkNewSentences = params[0];
+        this.similarityAlgorithm = params[1];
       })
   }
 
-  changeGroupThreshold(value: number) {
-    this.groupThreshold.value = value;
-    this.paramService.updateParameter(this.groupThreshold)
-      .subscribe(message=>{
-        this.groupThreshold = message.data[0] as Parameter;
-        this.messageService.new_alert(message.status_code, message.message);
-      })
-  }
-
-  changeMatchupThreshold(value: number) {
-    this.matchupThreshold.value = value;
-    this.paramService.updateParameter(this.matchupThreshold)
-      .subscribe(message=>{
-        this.matchupThreshold = message.data[1] as Parameter;
-        this.messageService.new_alert(message.status_code, message.message);
-      })
-  }
+  // changeGroupThreshold(value: number) {
+  //   this.groupThreshold.value = value;
+  //   this.paramService.updateParameter(this.groupThreshold)
+  //     .subscribe(message=>{
+  //       this.groupThreshold = message.data[0] as Parameter;
+  //       this.messageService.new_alert(message.status_code, message.message);
+  //     })
+  // }
+  //
+  // changeMatchupThreshold(value: number) {
+  //   this.matchupThreshold.value = value;
+  //   this.paramService.updateParameter(this.matchupThreshold)
+  //     .subscribe(message=>{
+  //       this.matchupThreshold = message.data[1] as Parameter;
+  //       this.messageService.new_alert(message.status_code, message.message);
+  //     })
+  // }
 
   changeCheckNewSentences() {
     this.checkNewSentences.value = 1 - this.checkNewSentences.value;
     this.paramService.updateParameter(this.checkNewSentences)
       .subscribe(message=> {
-        this.checkNewSentences = message.data[2] as Parameter;
+        this.checkNewSentences = message.data[0] as Parameter;
         this.messageService.new_alert(message.status_code, message.message);
       })
   }
@@ -115,7 +115,7 @@ export class SettingsComponent implements OnInit{
     this.similarityAlgorithm.value = value;
     this.paramService.updateParameter(this.similarityAlgorithm)
       .subscribe(message=>{
-        this.similarityAlgorithm = message.data[3] as Parameter;
+        this.similarityAlgorithm = message.data[1] as Parameter;
         this.messageService.new_alert(message.status_code, message.message);
       })
   }
