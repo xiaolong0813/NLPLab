@@ -109,8 +109,13 @@ export class RfqComponent implements OnInit{
         {"id":2, "value":"C"},
         {"id":3, "value":"D"}
       ],
+      compareLevel: [
+        {"id":0, "value":"Paragraph"},
+        {"id":1, "value":"Sentence"}
+      ],
       selectedRfqVar: 0,
       selectedModel: 0,
+      selectedLevel: 0,
       selectedSimilarityAlgo: this.defaultSimilarityAlgo
       // defaultSimilarityAlgo: this.defaultSimilarityAlgo
     };

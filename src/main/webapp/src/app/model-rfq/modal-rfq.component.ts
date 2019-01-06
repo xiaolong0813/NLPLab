@@ -19,7 +19,7 @@ import {ParameterService} from "../services/parameter.service";
         <div>
           <div class="form-group">
             <label class="col-form-label">ZPF Model:
-              <select [value]="selectedModel">
+              <select [value]="selectedModel" #ref (change)="changeModel(ref.value)">
                 <option [value]="item.id"
                         *ngFor="let item of ZPFModelArray">{{item.value}}</option>
               </select>
@@ -28,7 +28,7 @@ import {ParameterService} from "../services/parameter.service";
 
           <div class="form-group">
             <label class="col-form-label">RFQ var:
-              <select [value]="selectedRfqVar">
+              <select [value]="selectedRfqVar" #ref (change)="changeRfqVar(ref.value)">
                 <option [value]="item.id"
                         *ngFor="let item of RfqVarArray">{{item.value}}</option>
               </select>
@@ -37,9 +37,18 @@ import {ParameterService} from "../services/parameter.service";
 
           <div class="form-group">
             <label class="col-form-label">Sentence Similarity Algorithm:
-              <select [value]="selectedSimilarityAlgo">
+              <select [value]="selectedSimilarityAlgo" #ref (change)="changeSimilarityAlgo(ref.value)">
                 <option [value]="item.id"
                         *ngFor="let item of similarityAlgorithmArray">{{item.value}}</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="col-form-label">Match Level:
+              <select [value]="selectedLevel" #ref (change)="changeLevel(ref.value)">
+                <option [value]="item.id"
+                        *ngFor="let item of compareLevel">{{item.value}}</option>
               </select>
             </label>
           </div>
@@ -73,10 +82,12 @@ export class ModalRfqComponent {
   similarityAlgorithmArray: object;
   ZPFModelArray: object;
   RfqVarArray: object;
+  compareLevel: object;
 
   selectedRfqVar: number;
   selectedModel: number;
   selectedSimilarityAlgo: number;
+  selectedLevel: number;
   // defaultSimilarityAlgo: number;
 
   constructor(public modalRef: BsModalRef, private parameterService: ParameterService, private messageService: MessageService, private fileService: FileService) {}
@@ -87,8 +98,24 @@ export class ModalRfqComponent {
     this.modalRef.hide();
   }
 
+  changeModel(value) {
+    this.selectedModel = value;
+  }
+
+  changeRfqVar(value) {
+    this.selectedRfqVar = value;
+  }
+
+  changeSimilarityAlgo(value) {
+    this.selectedSimilarityAlgo = value;
+  }
+
+  changeLevel(value) {
+    this.selectedLevel = value;
+  }
+
   process() {
-    this.fileService.processDoc(this.doc_id, this.selectedModel, this.selectedRfqVar, this.selectedSimilarityAlgo)
+    this.fileService.processDoc(this.doc_id, this.selectedModel, this.selectedRfqVar, this.selectedSimilarityAlgo, this.selectedLevel)
       .subscribe(message => {
         if (message.status_code == 200) {
           location.reload();

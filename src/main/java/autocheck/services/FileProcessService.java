@@ -4,6 +4,9 @@ import autocheck.models.*;
 import com.google.common.collect.Iterables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.util.NumberToTextConverter;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -87,10 +90,29 @@ public class FileProcessService {
             dev = new Deviation();
             dev.setDoc_id(doc.getId());
 
-            dev.setChapter_var_a(row.getCell(1, CREATE_NULL_AS_BLANK).getStringCellValue());
-            dev.setChapter_var_b(row.getCell(2, CREATE_NULL_AS_BLANK).getStringCellValue());
-            dev.setChapter_var_c(row.getCell(3, CREATE_NULL_AS_BLANK).getStringCellValue());
-            dev.setChapter_var_d(row.getCell(4, CREATE_NULL_AS_BLANK).getStringCellValue());
+            if(row.getCell(1, CREATE_NULL_AS_BLANK).getCellTypeEnum() == CellType.NUMERIC) {
+                dev.setChapter_var_d(NumberToTextConverter.toText(row.getCell(1, CREATE_NULL_AS_BLANK).getNumericCellValue()));
+            } else {
+                dev.setChapter_var_d(row.getCell(1, CREATE_NULL_AS_BLANK).getStringCellValue());
+            }
+
+            if(row.getCell(2, CREATE_NULL_AS_BLANK).getCellTypeEnum() == CellType.NUMERIC) {
+                dev.setChapter_var_d(NumberToTextConverter.toText(row.getCell(2, CREATE_NULL_AS_BLANK).getNumericCellValue()));
+            } else {
+                dev.setChapter_var_d(row.getCell(2, CREATE_NULL_AS_BLANK).getStringCellValue());
+            }
+
+            if(row.getCell(3, CREATE_NULL_AS_BLANK).getCellTypeEnum() == CellType.NUMERIC) {
+                dev.setChapter_var_d(NumberToTextConverter.toText(row.getCell(3, CREATE_NULL_AS_BLANK).getNumericCellValue()));
+            } else {
+                dev.setChapter_var_d(row.getCell(3, CREATE_NULL_AS_BLANK).getStringCellValue());
+            }
+
+            if(row.getCell(4, CREATE_NULL_AS_BLANK).getCellTypeEnum() == CellType.NUMERIC) {
+                dev.setChapter_var_d(NumberToTextConverter.toText(row.getCell(4, CREATE_NULL_AS_BLANK).getNumericCellValue()));
+            } else {
+                dev.setChapter_var_d(row.getCell(4, CREATE_NULL_AS_BLANK).getStringCellValue());
+            }
 
             dev.setRfq_content_cn(row.getCell(5, CREATE_NULL_AS_BLANK).getStringCellValue());
             dev.setRfq_keysent_cn(row.getCell(6, CREATE_NULL_AS_BLANK).getStringCellValue());
@@ -130,7 +152,7 @@ public class FileProcessService {
     }
 
     @Async
-    public void processDoc(Document doc, Integer model, Integer rfqVar, Integer simAlgo) throws IOException {
+    public void processDoc(Document doc, Integer model, Integer rfqVar, Integer simAlgo, Integer level) throws IOException {
         logger.info("Start processing RFQ document file " + doc.getFilename());
 
         String filepath = path + doc.getFilepath();
@@ -188,7 +210,7 @@ public class FileProcessService {
         int dev_tot = Iterables.size(devs);
         Collection<Future<List<String>>> results_dev = new ArrayList<>(dev_tot);
         for (Deviation dev: devs) {
-            results_dev.add(itemProcessService.findSimilarDev(dev, paragraphs, model, rfqVar, simAlgo));
+            results_dev.add(itemProcessService.findSimilarDev(dev, paragraphs, model, rfqVar, simAlgo, level));
         }
 
         // wait for all threads

@@ -91,11 +91,16 @@ public class FileController {
     public Message processDoc(@RequestParam("doc_id") String doc_id_str,
                               @RequestParam("model") String model_str,
                               @RequestParam("rfqvar") String rfqvar_str,
-                              @RequestParam("simalgo") String simalgo_str) throws Exception {
+                              @RequestParam("simalgo") String simalgo_str,
+                              @RequestParam("level") String level_str) throws Exception {
         Long docId = Long.parseLong(doc_id_str);
         Integer model = Integer.parseInt(model_str);
         Integer rfqVar = Integer.parseInt(rfqvar_str);
         Integer simAlgo = Integer.parseInt(simalgo_str);
+        Integer level = Integer.parseInt(level_str);
+//        logger.info("rfqvar is " + rfqvar_str);
+//        logger.info("simalgo is " + simalgo_str);
+//        logger.info("Level is " + level_str);
 
         Message message = new Message();
         Optional<Document> doc_opt = documentRepository.findById(docId);
@@ -111,7 +116,7 @@ public class FileController {
                 doc.setStatus(3);
                 documentRepository.save(doc);
                 logger.info("Start processing document");
-                fileProcessService.processDoc(doc, model, rfqVar, simAlgo);
+                fileProcessService.processDoc(doc, model, rfqVar, simAlgo, level);
             }
             message.setData(documentRepository.findByFiletypeOrderByIdDesc(1));
             message.setStatus_code(200);

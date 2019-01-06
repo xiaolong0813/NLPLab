@@ -1,6 +1,9 @@
 package autocheck.services;
 
 import autocheck.models.*;
+import edu.stanford.nlp.pipeline.CoreDocument;
+import edu.stanford.nlp.pipeline.CoreSentence;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -13,6 +16,7 @@ import org.xm.similarity.text.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.Future;
 
 @Service
@@ -63,7 +67,7 @@ public class ItemProcessService {
     }
 
     @Async
-    public Future<List<String>> findSimilarDev(Deviation dev, List<XWPFParagraph> paragraphs, Integer model, Integer rfqVar, Integer simAlgo) {
+    public Future<List<String>> findSimilarDev(Deviation dev, List<XWPFParagraph> paragraphs, Integer model, Integer rfqVar, Integer simAlgo, Integer level) {
         Double simValue, maxValue;
         Integer startRow, endRow, maxStartRow, maxEndRow;
         String maxString, heading;
@@ -79,24 +83,69 @@ public class ItemProcessService {
         maxString = "";
         heading = "";
 
-        String dev_text = dev.getRfq_content_cn();
+        String dev_text;
 
-        while (startRow < paragraphs.size()) {
-            while (endRow < paragraphs.size() && doc_text.toString().length() < dev_text.length()) {
-                doc_text.append(paragraphs.get(endRow).getText());
-                endRow += 1;
+        if (level == 0) {
+            // Match with Paragraph
+            dev_text = dev.getRfq_content_cn();
+            while (startRow < paragraphs.size()) {
+                while (endRow < paragraphs.size() && doc_text.toString().length() < dev_text.length()) {
+                    doc_text.append(paragraphs.get(endRow).getText());
+                    endRow += 1;
+                }
+                simValue = getSimValue(doc_text.toString(), dev_text, simAlgo);
+                if (simValue > maxValue) {
+                    maxValue = simValue;
+                    maxStartRow = startRow;
+                    maxEndRow = endRow;
+                    maxString = doc_text.toString();
+                }
+                startRow += 1;
+                endRow = startRow;
+                doc_text = new StringBuilder();
             }
-            simValue = getSimValue(doc_text.toString(), dev_text, simAlgo);
-            if (simValue > maxValue) {
-                maxValue = simValue;
-                maxStartRow = startRow;
-                maxEndRow = endRow;
-                maxString = doc_text.toString();
+        } else {
+            // Match with Sentence
+            dev_text = dev.getRfq_keysent_cn();
+            String paragraph_text;
+            String sentence_text;
+            Properties props = new Properties();
+            props.setProperty("annotators", "tokenize,ssplit");
+            StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+            Integer rowNo = 0;
+
+            for (XWPFParagraph paragraph:paragraphs) {
+                // Split paragraph into sentences
+                paragraph_text = paragraph.getText();
+                CoreDocument para_doc = new CoreDocument(paragraph_text);
+                pipeline.annotate(para_doc);
+                List<CoreSentence> sentences = para_doc.sentences();
+                Integer startNo, endNo;
+                StringBuilder sent_text = new StringBuilder();
+                startNo = 0;
+                endNo = 0;
+
+                while (startNo < sentences.size()) {
+                    while (endNo < sentences.size() && sent_text.toString().length() < dev_text.length()) {
+                        sent_text.append(sentences.get(endNo).text());
+                        endNo += 1;
+                    }
+                    simValue = getSimValue(sent_text.toString(), dev_text, simAlgo);
+                    if (simValue > maxValue) {
+                        maxValue = simValue;
+                        maxStartRow = rowNo;
+                        maxEndRow = rowNo;
+                        maxString = sent_text.toString();
+                    }
+                    startNo += 1;
+                    endNo = startNo;
+                    sent_text = new StringBuilder();
+                }
+                rowNo += 1;
             }
-            startRow += 1;
-            endRow = startRow;
-            doc_text = new StringBuilder();
         }
+
         // Get Heading
         for (int i = maxStartRow; i > 0; --i) {
             if (paragraphs.get(i).getStyle() != null && paragraphs.get(i).getStyle().contains("Heading")) {
@@ -104,6 +153,7 @@ public class ItemProcessService {
                 break;
             }
         }
+
         list.add(heading);
         list.add(dev_text);
         list.add(maxString);
@@ -134,12 +184,8 @@ public class ItemProcessService {
 
         list.add(maxStartRow.toString());
         list.add(maxEndRow.toString());
-        return new AsyncResult<>(list);
 
-//        if (maxValue > threshold) {
-//
-//        }
-//        return new AsyncResult<>(list);
+        return new AsyncResult<>(list);
     }
 
 

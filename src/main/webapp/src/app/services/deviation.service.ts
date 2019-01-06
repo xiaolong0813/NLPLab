@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import { Observable, of } from 'rxjs';
 import {Deviation} from "../Deviation";
+import {Message} from "../message";
 
 
 const httpOptions = {
@@ -19,5 +20,9 @@ export class DeviationService {
 
   getDevs():Observable<Deviation[]> {
     return this.http.get<Deviation[]>(this.api+'getDevs');
+  }
+
+  removeAllDevs(): Observable<Message> {
+    return this.http.delete<Message>(this.api)
   }
 }

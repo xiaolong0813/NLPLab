@@ -9,6 +9,10 @@ import { Parameter } from "../parameter";
 
 import { TypeService } from "../services/type.service";
 import { ParameterService } from "../services/parameter.service";
+import {DeviationService} from "../services/deviation.service";
+import {MessageService} from "../services/message.service";
+import {DeviationDetailComponent} from "../deviation-detail/deviation-detail.component";
+import {componentRefresh} from "@angular/core/src/render3/instructions";
 
 @Component({
   selector: 'app-deviations',
@@ -17,12 +21,14 @@ import { ParameterService } from "../services/parameter.service";
 })
 export class DeviationsComponent implements OnInit{
   types: Type[];
+  // reloadFlag: number;
   // defaultThreshold: number;
 
   modalRef: BsModalRef;
-  constructor(private modalService: BsModalService, private typeService: TypeService, private paramService: ParameterService) {}
+  constructor(private modalService: BsModalService, private deviationService: DeviationService, private messageService: MessageService) {}
 
   ngOnInit() {
+    // this.reloadFlag = 1;
     // this.getTypes();
     // this.getParams();
   }
@@ -48,5 +54,16 @@ export class DeviationsComponent implements OnInit{
       // types: this.types
     };
     this.modalRef = this.modalService.show(ModalContentComponent, {initialState});
+  }
+
+  removeAllDev() {
+    if (confirm("Are you sure to remove all the deviation records?")) {
+      this.deviationService.removeAllDevs()
+        .subscribe(message=>{
+          // this.reloadFlag = 1-this.reloadFlag;
+          this.messageService.new_alert(message.status_code, message.message);
+          window.location.reload(true)
+        })
+    }
   }
 }

@@ -16,6 +16,7 @@
 ✓ Update deviation structure
 ☐ Extract TOC for comparison
 ☐ Compare with key sentences (instead of paragraph)
+☐ Add Comment to code
 ✓ Highlight different colors for different teams
 ✓ List different colors for siemens engineers
 

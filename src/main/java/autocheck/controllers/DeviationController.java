@@ -1,9 +1,6 @@
 package autocheck.controllers;
 
-import autocheck.models.Deviation;
-import autocheck.models.DeviationRepository;
-import autocheck.models.Type;
-import autocheck.models.TypeRepository;
+import autocheck.models.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,5 +30,15 @@ public class DeviationController {
 //            logger.info("Return deviation records with type " + type.getName());
 //            return deviationRepository.findByType(type.getName());
 //        }
+    }
+
+    @DeleteMapping
+    public Message deleteDevs() {
+        deviationRepository.deleteAll();
+        Message message = new Message();
+        message.setStatus_code(200);
+        message.setMessage("All the deviation records are removed.");
+        logger.info("Remove all the deviation records");
+        return message;
     }
 }

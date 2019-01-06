@@ -35,13 +35,14 @@ export class FileService {
     return this.http.get<Document[]>(this.api+'getAll/'+fileType);
   }
 
-  processDoc(doc_id: number, model: number, rfqvar: number, simalgo: number): Observable<Message> {
+  processDoc(doc_id: number, model: number, rfqvar: number, simalgo: number, level:number): Observable<Message> {
     return this.http.get<Message>(this.api+'processDoc/', {
       params: {
         'doc_id': doc_id.toString(),
         'model': model.toString(),
         'rfqvar': rfqvar.toString(),
-        'simalgo': simalgo.toString()
+        'simalgo': simalgo.toString(),
+        'level': level.toString()
       }
     });
   }

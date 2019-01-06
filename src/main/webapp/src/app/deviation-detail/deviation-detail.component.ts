@@ -1,20 +1,23 @@
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
-import { FileService } from "../services/file.service";
+import {FileService} from "../services/file.service";
 import {Deviation} from "../Deviation";
 import {DeviationService} from "../services/deviation.service";
 
 @Component({
   selector: 'app-deviation-detail',
   templateUrl: './deviation-detail.component.html',
-  styleUrls: [ './deviation-detail.component.scss' ]
+  styleUrls: [ './deviation-detail.component.scss' ],
+  // changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DeviationDetailComponent implements OnInit{
+  // @Input() reload: number;
   // public typeId: number;
   public devs: Deviation[];
 
   constructor(private route: ActivatedRoute, private fileService: FileService, private deviationService: DeviationService) {
+    // this.getDevs();
     // route.params.subscribe(params => {
       // this.typeId = +params['type'];
       // this.getDevs();
@@ -32,6 +35,10 @@ export class DeviationDetailComponent implements OnInit{
         }
       })
   }
+
+  // ngOnChanges(): void {
+    // this.getDevs();
+  // }
 
   getDevs(): void {
     this.deviationService.getDevs()
