@@ -108,7 +108,6 @@ public class ItemProcessService {
             // Match with Sentence
             dev_text = dev.getRfq_keysent_cn();
             String paragraph_text;
-            String sentence_text;
             Properties props = new Properties();
             props.setProperty("annotators", "tokenize,ssplit");
             StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
@@ -135,7 +134,7 @@ public class ItemProcessService {
                     if (simValue > maxValue) {
                         maxValue = simValue;
                         maxStartRow = rowNo;
-                        maxEndRow = rowNo;
+                        maxEndRow = rowNo+1;
                         maxString = sent_text.toString();
                     }
                     startNo += 1;
