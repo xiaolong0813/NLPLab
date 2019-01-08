@@ -19,7 +19,7 @@ import {ParameterService} from "../services/parameter.service";
         <div>
           <div class="form-group">
             <label class="col-form-label">ZPF Model:
-              <select [value]="selectedModel" #ref (change)="changeModel(ref.value)">
+              <select [value]="selectedModel" #ref1 (change)="changeModel(ref1.value)">
                 <option [value]="item.id"
                         *ngFor="let item of ZPFModelArray">{{item.value}}</option>
               </select>
@@ -28,7 +28,7 @@ import {ParameterService} from "../services/parameter.service";
 
           <div class="form-group">
             <label class="col-form-label">RFQ var:
-              <select [value]="selectedRfqVar" #ref (change)="changeRfqVar(ref.value)">
+              <select [value]="selectedRfqVar" #ref2 (change)="changeRfqVar(ref2.value)">
                 <option [value]="item.id"
                         *ngFor="let item of RfqVarArray">{{item.value}}</option>
               </select>
@@ -37,7 +37,7 @@ import {ParameterService} from "../services/parameter.service";
 
           <div class="form-group">
             <label class="col-form-label">Sentence Similarity Algorithm:
-              <select [value]="selectedSimilarityAlgo" #ref (change)="changeSimilarityAlgo(ref.value)">
+              <select [value]="selectedSimilarityAlgo" #ref3 (change)="changeSimilarityAlgo(ref3.value)">
                 <option [value]="item.id"
                         *ngFor="let item of similarityAlgorithmArray">{{item.value}}</option>
               </select>
@@ -46,7 +46,7 @@ import {ParameterService} from "../services/parameter.service";
 
           <div class="form-group">
             <label class="col-form-label">Match Level:
-              <select [value]="selectedLevel" #ref (change)="changeLevel(ref.value)">
+              <select [value]="selectedLevel" #ref4 (change)="changeLevel(ref4.value)">
                 <option [value]="item.id"
                         *ngFor="let item of compareLevel">{{item.value}}</option>
               </select>
@@ -99,6 +99,7 @@ export class ModalRfqComponent {
   }
 
   changeModel(value) {
+    console.log(value);
     this.selectedModel = value;
   }
 

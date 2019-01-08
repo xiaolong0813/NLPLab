@@ -167,8 +167,11 @@ public class FileController {
                     logger.info("Start processing deviation document");
                     fileProcessService.processDev(doc);
                 } else {
-                    logger.info("Start splitting RFQ sentences");
-                    fileProcessService.processDocSentence(doc);
+//                    logger.info("Start splitting RFQ sentences");
+//                    fileProcessService.processDocSentence(doc);
+                    logger.info("Upload RFQ Document");
+                    doc.setStatus(2);
+                    documentRepository.save(doc);
                 }
 
                 Iterable<Document> docs = documentRepository.findByStatusAndFiletype(1, fileType);
