@@ -7,10 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.NumberToTextConverter;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -116,7 +113,26 @@ public class FileProcessService {
 
             dev.setRfq_content_cn(row.getCell(5, CREATE_NULL_AS_BLANK).getStringCellValue());
             dev.setRfq_keysent_cn(row.getCell(6, CREATE_NULL_AS_BLANK).getStringCellValue());
-            dev.setDev_content_cn(row.getCell(7, CREATE_NULL_AS_BLANK).getStringCellValue());
+
+
+//            dev.setDev_content_cn(row.getCell(7, CREATE_NULL_AS_BLANK).getStringCellValue());
+            XSSFRichTextString dev_text = row.getCell(7, CREATE_NULL_AS_BLANK).getRichStringCellValue();
+            String source_dev_text = row.getCell(7, CREATE_NULL_AS_BLANK).getStringCellValue();
+            StringBuilder real_dev_text = new StringBuilder();
+            boolean is_strike = false;
+            for (int pos = 0; pos < dev_text.length(); ++pos) {
+                if (dev_text.getFontAtIndex(pos) != null && dev_text.getFontAtIndex(pos).getStrikeout()) {
+                    is_strike = true;
+                } else {
+                    real_dev_text.append(source_dev_text.charAt(pos));
+                }
+            }
+            if (is_strike) {
+                dev.setDev_content_cn("删除。\n" + real_dev_text.toString());
+            } else {
+                dev.setDev_content_cn(real_dev_text.toString());
+            }
+
             dev.setContract_wording_cn(row.getCell(8, CREATE_NULL_AS_BLANK).getStringCellValue());
             dev.setRfq_content_en(row.getCell(9, CREATE_NULL_AS_BLANK).getStringCellValue());
             dev.setCategory(row.getCell(10, CREATE_NULL_AS_BLANK).getStringCellValue());
