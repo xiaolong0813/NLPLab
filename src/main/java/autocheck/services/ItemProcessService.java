@@ -15,6 +15,7 @@ import org.xm.Similarity;
 import org.xm.similarity.text.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Future;
@@ -89,6 +90,10 @@ public class ItemProcessService {
             // Match with Paragraph
             dev_text = dev.getRfq_content_cn();
             while (startRow < paragraphs.size()) {
+                while (startRow < paragraphs.size() && paragraphs.get(startRow).getText().length() == 0) {
+                    startRow += 1;
+                    endRow = startRow;
+                }
                 while (endRow < paragraphs.size() && doc_text.toString().length() < dev_text.length()) {
                     doc_text.append(paragraphs.get(endRow).getText());
                     endRow += 1;
@@ -146,10 +151,15 @@ public class ItemProcessService {
         }
 
         // Get Heading
-        for (int i = maxStartRow; i > 0; --i) {
-            if (paragraphs.get(i).getStyle() != null && paragraphs.get(i).getStyle().contains("Heading")) {
-                heading = paragraphs.get(i).getText();
-                break;
+        String[] values = {"Heading1","Heading2","Heading3"};
+
+        for (int i = maxStartRow; i >= 0; i--) {
+            if (paragraphs.get(i).getStyle() != null) {
+                boolean contains = Arrays.stream(values).anyMatch(paragraphs.get(i).getStyle()::equals);
+                if (contains) {
+                    heading = paragraphs.get(i).getText().split(" ")[0];
+                    break;
+                }
             }
         }
 
