@@ -7,6 +7,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFStyles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -68,7 +69,7 @@ public class ItemProcessService {
     }
 
     @Async
-    public Future<List<String>> findSimilarDev(Deviation dev, List<XWPFParagraph> paragraphs, Integer model, Integer rfqVar, Integer simAlgo, Integer level) {
+    public Future<List<String>> findSimilarDev(XWPFStyles styles, Deviation dev, List<XWPFParagraph> paragraphs, Integer model, Integer rfqVar, Integer simAlgo, Integer level) {
         Double simValue, maxValue;
         Integer startRow, endRow, maxStartRow, maxEndRow;
         String maxString, heading;
@@ -151,11 +152,11 @@ public class ItemProcessService {
         }
 
         // Get Heading
-        String[] values = {"Heading1","Heading2","Heading3"};
+        String[] values = {"Heading1","Heading2","Heading3","Heading 1","Heading 2","Heading 3","heading 1","heading 2","heading 3","heading1","heading2","heading3"};
 
         for (int i = maxStartRow; i >= 0; i--) {
-            if (paragraphs.get(i).getStyle() != null) {
-                boolean contains = Arrays.stream(values).anyMatch(paragraphs.get(i).getStyle()::equals);
+            if (paragraphs.get(i).getStyleID() != null) {
+                boolean contains = Arrays.stream(values).anyMatch(styles.getStyle(paragraphs.get(i).getStyleID()).getName()::equals);
                 if (contains) {
                     heading = paragraphs.get(i).getText().split(" ")[0];
                     break;

@@ -226,7 +226,7 @@ public class FileProcessService {
         int dev_tot = Iterables.size(devs);
         Collection<Future<List<String>>> results_dev = new ArrayList<>(dev_tot);
         for (Deviation dev: devs) {
-            results_dev.add(itemProcessService.findSimilarDev(dev, paragraphs, model, rfqVar, simAlgo, level));
+            results_dev.add(itemProcessService.findSimilarDev(document.getStyles(), dev, paragraphs, model, rfqVar, simAlgo, level));
         }
 
         // wait for all threads
