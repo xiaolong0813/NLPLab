@@ -14,7 +14,7 @@ import { IndexComponent } from "./index/index.component";
 import { DeviationsComponent } from "./deviations/deviations.component";
 import { DeviationDetailComponent } from "./deviation-detail/deviation-detail.component";
 import { ModalContentComponent } from "./modal-content/modal-content.component";
-import { ModalRfqComponent } from "./model-rfq/modal-rfq.component";
+import { ModalRfqComponent } from "./modal-rfq/modal-rfq.component";
 import { RfqComponent } from "./rfq/rfq.component";
 import { SettingsComponent } from "./settings/settings.component";
 import { HelpComponent } from "./help/help.component";

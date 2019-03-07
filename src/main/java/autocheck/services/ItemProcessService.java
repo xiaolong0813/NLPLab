@@ -4,10 +4,12 @@ import autocheck.models.*;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.CoreSentence;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import org.apache.commons.lang3.CharUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFStyles;
+import org.apache.xpath.operations.Bool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -68,10 +70,32 @@ public class ItemProcessService {
         }
     }
 
+    private String cleanSent(String sent) {
+        int pos = 0;
+        int len = sent.length();
+        while (pos < len && (sent.charAt(pos) == '.' || sent.charAt(pos) == ' ' || sent.charAt(pos) == '(' || sent.charAt(pos) == ')' || CharUtils.isAsciiAlphanumeric(sent.charAt(pos)) )) {
+            ++pos;
+        }
+        return sent.substring(pos);
+    }
+
+    @Async
+    public Future<Boolean> checkSimilarPara(String para_text, Iterable<Sentence> paras) {
+        Double maxValue = 0.0;
+        Integer simAlgo = parameterRepository.findByName("Similarity Algorithm").get(0).getValue().intValue();
+        for (Sentence para:paras) {
+            maxValue = Math.max(maxValue, getSimValue(cleanSent(para.toString()), cleanSent(para_text), simAlgo));
+        }
+        if (maxValue > 0.9)
+            return new AsyncResult<>(Boolean.TRUE);
+        else
+            return new AsyncResult<>(Boolean.FALSE);
+    }
+
     @Async
     public Future<List<String>> findSimilarDev(XWPFStyles styles, Deviation dev, List<XWPFParagraph> paragraphs, Integer model, Integer rfqVar, Integer simAlgo, Integer level) {
         Double simValue, maxValue;
-        Integer startRow, endRow, maxStartRow, maxEndRow;
+        Integer startRow, endRow, maxStartRow, maxEndRow, pos;
         String maxString, heading;
         ArrayList<String> list = new ArrayList<>();
 
@@ -84,6 +108,9 @@ public class ItemProcessService {
         maxValue = 0.0;
         maxString = "";
         heading = "";
+
+        // Heading Values
+        String[] values = {"Heading1","Heading2","Heading3","Heading 1","Heading 2","Heading 3","heading 1","heading 2","heading 3","heading1","heading2","heading3"};
 
         String dev_text;
 
@@ -99,7 +126,7 @@ public class ItemProcessService {
                     doc_text.append(paragraphs.get(endRow).getText());
                     endRow += 1;
                 }
-                simValue = getSimValue(doc_text.toString(), dev_text, simAlgo);
+                simValue = getSimValue(cleanSent(doc_text.toString()), cleanSent(dev_text), simAlgo);
                 if (simValue > maxValue) {
                     maxValue = simValue;
                     maxStartRow = startRow;
@@ -136,7 +163,7 @@ public class ItemProcessService {
                         sent_text.append(sentences.get(endNo).text());
                         endNo += 1;
                     }
-                    simValue = getSimValue(sent_text.toString(), dev_text, simAlgo);
+                    simValue = getSimValue(cleanSent(sent_text.toString()), cleanSent(dev_text), simAlgo);
                     if (simValue > maxValue) {
                         maxValue = simValue;
                         maxStartRow = rowNo;
@@ -152,8 +179,6 @@ public class ItemProcessService {
         }
 
         // Get Heading
-        String[] values = {"Heading1","Heading2","Heading3","Heading 1","Heading 2","Heading 3","heading 1","heading 2","heading 3","heading1","heading2","heading3"};
-
         for (int i = maxStartRow; i >= 0; i--) {
             if (paragraphs.get(i).getStyleID() != null) {
                 boolean contains = Arrays.stream(values).anyMatch(styles.getStyle(paragraphs.get(i).getStyleID()).getName()::equals);

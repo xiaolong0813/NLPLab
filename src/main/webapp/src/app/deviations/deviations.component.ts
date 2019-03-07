@@ -45,10 +45,21 @@ export class DeviationsComponent implements OnInit{
   //     })
   // }
 
-  openModelWithComponent() {
+  openModelWithComponent_Dev() {
     const initialState = {
       title: 'Upload deviation file',
       filetype: 'deviation'
+      // thresholdName: 'Group threshold',
+      // defaultThreshold: this.defaultThreshold,
+      // types: this.types
+    };
+    this.modalRef = this.modalService.show(ModalContentComponent, {initialState});
+  }
+
+  openModelWithComponent_DevSrc() {
+    const initialState = {
+      title: 'Upload deviation source file',
+      filetype: 'deviation_src'
       // thresholdName: 'Group threshold',
       // defaultThreshold: this.defaultThreshold,
       // types: this.types

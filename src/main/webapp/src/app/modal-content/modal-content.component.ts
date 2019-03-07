@@ -89,6 +89,7 @@ export class ModalContentComponent {
         .subscribe(message=> {
           // this.messageService.new_alert(message.status_code, message.message);
           if (message.status_code == 200) {
+            this.messageService.new_alert(message.status_code, message.message);
             location.reload();
             // this.closeModal();
           }
@@ -96,7 +97,30 @@ export class ModalContentComponent {
           //   this.fileService.newAlerts(message.data);
           // }
         });
-    } else {
+    } else if (this.filetype == 'deviation_src') {
+      //  Upload deviation source file
+      if (this.fileToUpload.type != "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        this.messageService.new_alert(-1, "Please upload a file with .docx extension.");
+        return;
+      }
+      this.formData.append("file", this.fileToUpload, this.fileToUpload.name);
+      this.formData.append("fileType", "2");
+      // this.formData.append("type", this.selectedTypeId.toString());
+      // this.formData.append("threshold", this.defaultThreshold.toString());
+      this.fileService.uploadFiles(this.formData)
+        .subscribe(message=> {
+          if (message.status_code == 200) {
+            this.messageService.new_alert(message.status_code, message.message);
+            location.reload();
+            // this.messageService.new_alert(message.status_code, message.message);
+            // this.closeModal();
+          }
+          // if (message.data.length != 0) {
+          //   this.fileService.newAlerts(message.data);
+          // }
+        });
+
+    } else if (this.filetype == 'rfq') {
       //  Upload RFQ file
       if (this.fileToUpload.type != "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
         this.messageService.new_alert(-1, "Please upload a file with .docx extension.");
@@ -109,13 +133,9 @@ export class ModalContentComponent {
       this.fileService.uploadFiles(this.formData)
         .subscribe(message=> {
           if (message.status_code == 200) {
+            this.messageService.new_alert(message.status_code, message.message);
             location.reload();
-            // this.messageService.new_alert(message.status_code, message.message);
-            // this.closeModal();
           }
-          // if (message.data.length != 0) {
-          //   this.fileService.newAlerts(message.data);
-          // }
         });
     }
   }

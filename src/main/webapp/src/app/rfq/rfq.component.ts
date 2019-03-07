@@ -13,7 +13,7 @@ import { TypeService } from "../services/type.service";
 import { ParameterService } from "../services/parameter.service";
 import { FileService } from "../services/file.service";
 import { MessageService } from "../services/message.service";
-import { ModalRfqComponent } from "../model-rfq/modal-rfq.component";
+import { ModalRfqComponent } from "../modal-rfq/modal-rfq.component";
 
 @Component({
   selector: 'app-rfq',
@@ -144,5 +144,15 @@ export class RfqComponent implements OnInit{
         console.log("???");
         saveAs(data);
       });
+  }
+  removeAllDOC() {
+    if (confirm("Are you sure to remove all the documents (including RFQ files and deviation files)?")) {
+      this.fileService.removeAllDOC()
+        .subscribe(message=>{
+          // this.reloadFlag = 1-this.reloadFlag;
+          this.messageService.new_alert(message.status_code, message.message);
+          window.location.reload(true)
+        })
+    }
   }
 }

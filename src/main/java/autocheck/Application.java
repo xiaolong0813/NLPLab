@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.xm.Similarity;
+import org.xm.similarity.text.*;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -41,6 +43,26 @@ public class Application {
     }
     public static void main(String[] args) {
         logger.info("Start the server");
+//        logger.info("Test similarity");
+//        String A = "油脂润滑系统（如适用）";
+//        String B = "(14) HCO系统/RSD（如适用）";
+//        TextSimilarity similarity;
+//        similarity = new CosineSimilarity();
+//        logger.info(similarity.getSimilarity(A, B));
+//        similarity = new EuclideanDistanceTextSimilarity();
+//        logger.info(similarity.getSimilarity(A, B));
+//        similarity = new JaccardTextSimilarity();
+//        logger.info(similarity.getSimilarity(A, B));
+//        similarity = new JaroDistanceTextSimilarity();
+//        logger.info(similarity.getSimilarity(A, B));
+////        similarity = new JaroWinklerDistanceTextSimilarity();
+////        logger.info(similarity.getSimilarity(A, B));
+//        similarity = new ManhattanDistanceTextSimilarity();
+//        logger.info(similarity.getSimilarity(A, B));
+//        similarity = new SimHashPlusHammingDistanceTextSimilarity();
+//        logger.info(similarity.getSimilarity(A, B));
+//        similarity = new DiceTextSimilarity();
+//        logger.info(similarity.getSimilarity(A, B));
         SpringApplication.run(Application.class, args);
     }
 }

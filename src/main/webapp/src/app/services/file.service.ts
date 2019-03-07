@@ -35,6 +35,10 @@ export class FileService {
     return this.http.get<Document[]>(this.api+'getAll/'+fileType);
   }
 
+  removeAllDOC(): Observable<Message> {
+    return this.http.delete<Message>(this.api)
+  }
+
   processDoc(doc_id: number, model: number, rfqvar: number, simalgo: number, level:number): Observable<Message> {
     return this.http.get<Message>(this.api+'processDoc/', {
       params: {

@@ -59,6 +59,16 @@ public class FileController {
         return documentRepository.findByFiletypeOrderByIdDesc(Integer.parseInt(fileType));
     }
 
+    @DeleteMapping
+    public Message deleteRFQ() {
+        documentRepository.deleteAll();
+        Message message = new Message();
+        message.setStatus_code(200);
+        message.setMessage("All the documents are removed.");
+        logger.info("Remove all the documents");
+        return message;
+    }
+
     @GetMapping(path = "/downloadXlsx/{docId}")
     public ResponseEntity<Resource> downloadXlsx(@PathVariable Long docId) throws IOException{
         Document doc = documentRepository.findById(docId).get();
@@ -157,21 +167,27 @@ public class FileController {
                 doc.setFiletype(fileType);
 //                Type type = typeRepository.findById(typeid).get();
 //                doc.setType(type.getName());
-                doc.setStatus(0);
+//                doc.setStatus(0);
 //                doc.setThreshold(threshold);
-                documentRepository.save(doc);
+//                documentRepository.save(doc);
 
                 doc.setStatus(1);
                 documentRepository.save(doc);
                 if (fileType == 0) {
                     logger.info("Start processing deviation document");
                     fileProcessService.processDev(doc);
-                } else {
+                } else if (fileType == 1) {
 //                    logger.info("Start splitting RFQ sentences");
 //                    fileProcessService.processDocSentence(doc);
                     logger.info("Upload RFQ Document");
                     doc.setStatus(2);
                     documentRepository.save(doc);
+                } else if (fileType == 2) {
+                    logger.info("Upload Deviation Source Document");
+                    logger.info("Start splitting deviation paragraphs");
+                    fileProcessService.processDocSentence(doc);
+//                    doc.setStatus(2);
+//                    documentRepository.save(doc);
                 }
 
                 Iterable<Document> docs = documentRepository.findByStatusAndFiletype(1, fileType);

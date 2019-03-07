@@ -11,6 +11,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.xpath.operations.Bool;
 import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.impl.STAlignHImpl;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class FileProcessService {
             STHighlightColor.GREEN,
             STHighlightColor.RED,
             STHighlightColor.MAGENTA,
-            STHighlightColor.LIGHT_GRAY,
+//            STHighlightColor.LIGHT_GRAY,
             STHighlightColor.DARK_CYAN,
             STHighlightColor.DARK_YELLOW,
             STHighlightColor.DARK_BLUE
@@ -177,7 +178,8 @@ public class FileProcessService {
 
         File newDocFile = new File(filepath);
         XWPFDocument newDoc = new XWPFDocument(new FileInputStream(newDocFile));
-        newDoc.setTrackRevisions(true);
+//        Iterable<Document> dev_src_files = documentRepository.findByFiletype(2);
+//        newDoc.setTrackRevisions();
         List<XWPFParagraph> newParagraphs = newDoc.getParagraphs();
         XWPFParagraph newParagraph;
         int startRow, endRow;
@@ -216,9 +218,9 @@ public class FileProcessService {
         rowNum += 1;
 
         // Process Document
-        File file = new File(filepath);
-        XWPFDocument document = new XWPFDocument(new FileInputStream(file));
-        List<XWPFParagraph> paragraphs = document.getParagraphs();
+//        File file = new File(filepath);
+//        XWPFDocument document = new XWPFDocument(new FileInputStream(file));
+//        List<XWPFParagraph> paragraphs = document.getParagraphs();
 
         // Get type devations and calculate TF-IDF
         Iterable<Deviation> devs = deviationRepository.findAll();
@@ -226,11 +228,10 @@ public class FileProcessService {
         int dev_tot = Iterables.size(devs);
         Collection<Future<List<String>>> results_dev = new ArrayList<>(dev_tot);
         for (Deviation dev: devs) {
-            results_dev.add(itemProcessService.findSimilarDev(document.getStyles(), dev, paragraphs, model, rfqVar, simAlgo, level));
+            results_dev.add(itemProcessService.findSimilarDev(newDoc.getStyles(), dev, newParagraphs, model, rfqVar, simAlgo, level));
         }
 
         // wait for all threads
-        String newParagraphText;
         for (Future<List<String>> result: results_dev) {
             try {
                 List<String> text_result = result.get();
@@ -282,49 +283,73 @@ public class FileProcessService {
         if (new_sentence_flag == 1) {
             // process new content
             logger.info("Start finding new sentences");
-            List<Sentence> new_sentences = sentenceRepository.findByDoc_id(doc.getId());
-            List<Sentence> old_sentences = sentenceRepository.findByDoc_idIsNot(doc.getId());
-
-            int sentence_tot = new_sentences.size();
-            Collection<Future<String>> results = new ArrayList<>(sentence_tot);
-            for (Sentence new_sentence : new_sentences) {
-                results.add(itemProcessService.checkSentence(new_sentence.getText(), old_sentences));
+            int para_tot = newParagraphs.size();
+            // Get old paragraphs from database
+            Iterable<Sentence> paras = sentenceRepository.findAll();
+            Collection<Future<Boolean>> results_para = new ArrayList<>(para_tot);
+            for (XWPFParagraph paragraph: newParagraphs) {
+                results_para.add(itemProcessService.checkSimilarPara(paragraph.getText(), paras));
             }
 
             // wait for all threads
-            for (Future<String> result: results) {
+            int para_num = 0;
+            for (Future<Boolean> result: results_para) {
                 try {
-                    String new_text = result.get();
-                    if (!new_text.isEmpty()) {
-                        row = sheet.createRow(rowNum);
-                        cell = row.createCell(0); // ID
-                        cell.setCellValue(rowNum);
-                        cell = row.createCell(1);
-                        cell.setCellValue("");
-                        cell = row.createCell(2);
-                        cell.setCellValue("");
-                        cell = row.createCell(3);
-                        cell.setCellValue(new_text);
-                        cell = row.createCell(4);
-                        cell.setCellValue("");
-                        cell = row.createCell(5);
-                        cell.setCellValue("");
-                        cell = row.createCell(6);
-                        cell.setCellValue("");
-                        cell = row.createCell(7);
-                        cell.setCellValue("");
-                        cell = row.createCell(8);
-                        cell.setCellValue("");
-                        cell = row.createCell(9);
-                        cell.setCellValue("");
-                        rowNum += 1;
-                        logger.info("Find new sentence, total: " + (rowNum-1));
+                    Boolean checkSim = result.get();
+                    if (!checkSim) {
+                        newParagraph = newParagraphs.get(para_num);
+                        for (XWPFRun pRun: newParagraph.getRuns()) {
+                            pRun.getCTR().addNewRPr().addNewHighlight().setVal(STHighlightColor.LIGHT_GRAY);
+                        }
                     }
+                    para_num += 1;
                 } catch (InterruptedException | ExecutionException e) {
                     //handle thread error
-                    logger.error(e.getMessage());
                 }
             }
+//            List<Sentence> new_sentences = sentenceRepository.findByDoc_id(doc.getId());
+//            List<Sentence> old_sentences = sentenceRepository.findByDoc_idIsNot(doc.getId());
+//
+//            int sentence_tot = new_sentences.size();
+//            Collection<Future<String>> results = new ArrayList<>(sentence_tot);
+//            for (Sentence new_sentence : new_sentences) {
+//                results.add(itemProcessService.checkSentence(new_sentence.getText(), old_sentences));
+//            }
+//
+//            // wait for all threads
+//            for (Future<String> result: results) {
+//                try {
+//                    String new_text = result.get();
+//                    if (!new_text.isEmpty()) {
+//                        row = sheet.createRow(rowNum);
+//                        cell = row.createCell(0); // ID
+//                        cell.setCellValue(rowNum);
+//                        cell = row.createCell(1);
+//                        cell.setCellValue("");
+//                        cell = row.createCell(2);
+//                        cell.setCellValue("");
+//                        cell = row.createCell(3);
+//                        cell.setCellValue(new_text);
+//                        cell = row.createCell(4);
+//                        cell.setCellValue("");
+//                        cell = row.createCell(5);
+//                        cell.setCellValue("");
+//                        cell = row.createCell(6);
+//                        cell.setCellValue("");
+//                        cell = row.createCell(7);
+//                        cell.setCellValue("");
+//                        cell = row.createCell(8);
+//                        cell.setCellValue("");
+//                        cell = row.createCell(9);
+//                        cell.setCellValue("");
+//                        rowNum += 1;
+//                        logger.info("Find new sentence, total: " + (rowNum-1));
+//                    }
+//                } catch (InterruptedException | ExecutionException e) {
+//                    //handle thread error
+//                    logger.error(e.getMessage());
+//                }
+//            }
         }
 
         wb.write(new FileOutputStream(resultpath));
@@ -336,7 +361,7 @@ public class FileProcessService {
 
     @Async
     public void processDocSentence(Document doc) throws IOException {
-        logger.info("Start splitting RFQ ocument file " + doc.getFilename());
+        logger.info("Start splitting deviation document file " + doc.getFilename());
 
 //        Properties props = new Properties();
 //        props.setProperty("annotators", "tokenize,ssplit");
@@ -347,19 +372,19 @@ public class FileProcessService {
         File file = new File(filepath);
         XWPFDocument document = new XWPFDocument(new FileInputStream(file));
         List<XWPFParagraph> paragraphs = document.getParagraphs();
-        List<XWPFRun> pruns;
+//        List<XWPFRun> pruns;
 
         int tot = 0;
 
         for (XWPFParagraph paragraph: paragraphs) {
-            pruns = paragraph.getRuns();
-            if (pruns.size() == 0 || pruns.get(0).isHighlighted()) continue;
+//            pruns = paragraph.getRuns();
+//            if (pruns.size() == 0 || pruns.get(0).isHighlighted()) continue;
             String p_text = paragraph.getText();
-            Sentence sentence1 = new Sentence();
-            sentence1.setDoc_id(doc.getId());
+            Sentence sentence = new Sentence();
+            sentence.setDoc_id(doc.getId());
 //            sentence1.setType(doc.getType());
-            sentence1.setText(p_text);
-            sentenceRepository.save(sentence1);
+            sentence.setText(p_text);
+            sentenceRepository.save(sentence);
             tot++;
 
 //            CoreDocument para_doc = new CoreDocument(p_text);
@@ -375,6 +400,6 @@ public class FileProcessService {
         }
         doc.setStatus(2);
         documentRepository.save(doc);
-        logger.info("Finish splitting, the document has " + tot + " sentences.");
+        logger.info("Finish splitting, the document has " + tot + " paragraphs.");
     }
 }
