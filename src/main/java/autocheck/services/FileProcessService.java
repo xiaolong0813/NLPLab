@@ -2,6 +2,9 @@ package autocheck.services;
 
 import autocheck.models.*;
 import com.google.common.collect.Iterables;
+import edu.stanford.nlp.pipeline.CoreDocument;
+import edu.stanford.nlp.pipeline.CoreSentence;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -11,6 +14,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFStyles;
 import org.apache.xpath.operations.Bool;
 import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.impl.STAlignHImpl;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
@@ -20,10 +24,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -172,13 +173,19 @@ public class FileProcessService {
     public void processDoc(Document doc, Integer model, Integer rfqVar, Integer simAlgo, Integer level) throws IOException {
         logger.info("Start processing RFQ document file " + doc.getFilename());
 
+        // Heading Values
+        String[] values = {"Heading1","Heading2","Heading3","Heading 1","Heading 2","Heading 3","heading 1","heading 2","heading 3","heading1","heading2","heading3"};
+
+        Properties props = new Properties();
+        props.setProperty("annotators", "tokenize,ssplit");
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
         String filepath = path + doc.getFilepath();
         String resultpath = filepath + "_deviation.xlsx";
         String resultDocPath = filepath + "_new.docx";
 
         File newDocFile = new File(filepath);
         XWPFDocument newDoc = new XWPFDocument(new FileInputStream(newDocFile));
-//        Iterable<Document> dev_src_files = documentRepository.findByFiletype(2);
 //        newDoc.setTrackRevisions();
         List<XWPFParagraph> newParagraphs = newDoc.getParagraphs();
         XWPFParagraph newParagraph;
@@ -222,13 +229,43 @@ public class FileProcessService {
 //        XWPFDocument document = new XWPFDocument(new FileInputStream(file));
 //        List<XWPFParagraph> paragraphs = document.getParagraphs();
 
+        List<CoreSentence> sentences = new ArrayList<>();
+        List<CoreSentence> cur_sentences;
+//        List<String> sentences = new ArrayList<>();
+//        List<String> cur_sentences;
+        List<Integer> p_ids = new ArrayList<>();
+        List<String> headings = new ArrayList<>();
+        String heading = "", paragraph_text;
+        XWPFStyles styles = newDoc.getStyles();
+        Integer pos = 0;
+        for (XWPFParagraph paragraph:newParagraphs) {
+            if (paragraph.getStyleID() != null) {
+                boolean contains = Arrays.stream(values).anyMatch(styles.getStyle(paragraph.getStyleID()).getName()::equals);
+                if (contains) {
+                    heading = paragraph.getText().split(" ")[0];
+                }
+            }
+
+            paragraph_text = paragraph.getText();
+            CoreDocument para_doc = new CoreDocument(paragraph_text);
+            pipeline.annotate(para_doc);
+            cur_sentences = para_doc.sentences();
+//            cur_sentences = Arrays.asList(paragraph_text.split("。"));
+            sentences.addAll(cur_sentences);
+            headings.addAll(Collections.nCopies(cur_sentences.size(), heading));
+            p_ids.addAll(Collections.nCopies(cur_sentences.size(), pos));
+            ++pos;
+        }
+
         // Get type devations and calculate TF-IDF
         Iterable<Deviation> devs = deviationRepository.findAll();
 
         int dev_tot = Iterables.size(devs);
         Collection<Future<List<String>>> results_dev = new ArrayList<>(dev_tot);
         for (Deviation dev: devs) {
-            results_dev.add(itemProcessService.findSimilarDev(newDoc.getStyles(), dev, newParagraphs, model, rfqVar, simAlgo, level));
+            if (level == 0 && dev.getRfq_content_cn().length() == 0) continue;
+            if (level == 1 && dev.getRfq_keysent_cn().length() == 0) continue;
+            results_dev.add(itemProcessService.findSimilarDev(dev, sentences, headings, model, rfqVar, simAlgo, level));
         }
 
         // wait for all threads
@@ -264,7 +301,7 @@ public class FileProcessService {
 
                     Long team_id = teamRepository.findByName(text_result.get(6)).get(0).getId();
 
-                    for (int p_idx = startRow; p_idx < endRow; ++p_idx) {
+                    for (int p_idx = p_ids.get(startRow); p_idx < p_ids.get(endRow); ++p_idx) {
                         newParagraph = newParagraphs.get(p_idx);
                         for (XWPFRun pRun: newParagraph.getRuns()) {
                             pRun.getCTR().addNewRPr().addNewHighlight().setVal(colorArray.get(team_id.intValue()));
@@ -307,49 +344,6 @@ public class FileProcessService {
                     //handle thread error
                 }
             }
-//            List<Sentence> new_sentences = sentenceRepository.findByDoc_id(doc.getId());
-//            List<Sentence> old_sentences = sentenceRepository.findByDoc_idIsNot(doc.getId());
-//
-//            int sentence_tot = new_sentences.size();
-//            Collection<Future<String>> results = new ArrayList<>(sentence_tot);
-//            for (Sentence new_sentence : new_sentences) {
-//                results.add(itemProcessService.checkSentence(new_sentence.getText(), old_sentences));
-//            }
-//
-//            // wait for all threads
-//            for (Future<String> result: results) {
-//                try {
-//                    String new_text = result.get();
-//                    if (!new_text.isEmpty()) {
-//                        row = sheet.createRow(rowNum);
-//                        cell = row.createCell(0); // ID
-//                        cell.setCellValue(rowNum);
-//                        cell = row.createCell(1);
-//                        cell.setCellValue("");
-//                        cell = row.createCell(2);
-//                        cell.setCellValue("");
-//                        cell = row.createCell(3);
-//                        cell.setCellValue(new_text);
-//                        cell = row.createCell(4);
-//                        cell.setCellValue("");
-//                        cell = row.createCell(5);
-//                        cell.setCellValue("");
-//                        cell = row.createCell(6);
-//                        cell.setCellValue("");
-//                        cell = row.createCell(7);
-//                        cell.setCellValue("");
-//                        cell = row.createCell(8);
-//                        cell.setCellValue("");
-//                        cell = row.createCell(9);
-//                        cell.setCellValue("");
-//                        rowNum += 1;
-//                        logger.info("Find new sentence, total: " + (rowNum-1));
-//                    }
-//                } catch (InterruptedException | ExecutionException e) {
-//                    //handle thread error
-//                    logger.error(e.getMessage());
-//                }
-//            }
         }
 
         wb.write(new FileOutputStream(resultpath));

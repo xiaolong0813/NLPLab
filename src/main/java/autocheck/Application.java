@@ -45,7 +45,7 @@ public class Application {
         logger.info("Start the server");
 //        logger.info("Test similarity");
 //        String A = "油脂润滑系统（如适用）";
-//        String B = "(14) HCO系统/RSD（如适用）";
+//        String B = "油脂润滑系统(若适用)";
 //        TextSimilarity similarity;
 //        similarity = new CosineSimilarity();
 //        logger.info(similarity.getSimilarity(A, B));

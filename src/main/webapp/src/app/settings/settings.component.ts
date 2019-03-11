@@ -38,7 +38,8 @@ export class SettingsComponent implements OnInit{
       {"id":8, "value":"Jaro–Winkler距离"},
       {"id":9, "value":"曼哈顿距离"},
       {"id":10, "value":"SimHash + 汉明距离"},
-      {"id":11, "value":"Sørensen–Dice系数"}
+      {"id":11, "value":"Sørensen–Dice系数"},
+      {"id":12, "value":"Levenshtein距离"}
       ];
     // this.getTypes();
     this.getParams();
