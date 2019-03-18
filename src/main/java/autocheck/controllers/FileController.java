@@ -2,6 +2,7 @@ package autocheck.controllers;
 
 import autocheck.models.*;
 import autocheck.services.FileProcessService;
+import autocheck.services.TranslationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +33,6 @@ public class FileController {
 
     @Autowired
     private DocumentRepository documentRepository;
-
-//    @Autowired
-//    private TypeRepository typeRepository;
 
     @Autowired
     private FileProcessService fileProcessService;
@@ -108,9 +106,6 @@ public class FileController {
         Integer rfqVar = Integer.parseInt(rfqvar_str);
         Integer simAlgo = Integer.parseInt(simalgo_str);
         Integer level = Integer.parseInt(level_str);
-//        logger.info("rfqvar is " + rfqvar_str);
-//        logger.info("simalgo is " + simalgo_str);
-//        logger.info("Level is " + level_str);
 
         Message message = new Message();
         Optional<Document> doc_opt = documentRepository.findById(docId);
@@ -147,8 +142,6 @@ public class FileController {
         String filepath = path + fileUrl;
 
         Integer fileType = Integer.parseInt(params.getParameter("fileType"));
-//        Long typeid = Long.parseLong(params.getParameter("type"));
-//        Double threshold = Double.parseDouble(params.getParameter("threshold"));
 
         if (!file.isEmpty()) {
             try {
@@ -165,11 +158,6 @@ public class FileController {
                 doc.setFilename(filename);
                 doc.setFilepath(fileUrl);
                 doc.setFiletype(fileType);
-//                Type type = typeRepository.findById(typeid).get();
-//                doc.setType(type.getName());
-//                doc.setStatus(0);
-//                doc.setThreshold(threshold);
-//                documentRepository.save(doc);
 
                 doc.setStatus(1);
                 documentRepository.save(doc);
@@ -177,8 +165,6 @@ public class FileController {
                     logger.info("Start processing deviation document");
                     fileProcessService.processDev(doc);
                 } else if (fileType == 1) {
-//                    logger.info("Start splitting RFQ sentences");
-//                    fileProcessService.processDocSentence(doc);
                     logger.info("Upload RFQ Document");
                     doc.setStatus(2);
                     documentRepository.save(doc);
