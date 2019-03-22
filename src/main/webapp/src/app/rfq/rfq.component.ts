@@ -25,7 +25,6 @@ export class RfqComponent implements OnInit{
   docs: Document[];
   // defaultThreshold: number;
   defaultSimilarityAlgo: number;
-
   modalRef: BsModalRef;
   constructor(
     private modalService: BsModalService,
@@ -49,7 +48,7 @@ export class RfqComponent implements OnInit{
     this.paramService.getParameters()
       .subscribe(params=>{
         this.defaultSimilarityAlgo = params[1].value;
-      })
+      });
   }
 
   // getTypes(): void {

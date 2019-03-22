@@ -16,17 +16,26 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFStyles;
 import org.apache.xpath.operations.Bool;
+import org.checkerframework.checker.units.qual.A;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.impl.STAlignHImpl;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 
@@ -51,6 +60,15 @@ public class FileProcessService {
 
     @Autowired
     private ItemProcessService itemProcessService;
+
+    @Autowired
+    private XmlRepository xmlRepository;
+
+    @Autowired
+    private XmlTagContentRepository xmlTagContentRepository;
+
+    @Autowired
+    private TranslationService translationService;
 
     @Value("${file.path}")
     private String path;
@@ -396,4 +414,69 @@ public class FileProcessService {
         documentRepository.save(doc);
         logger.info("Finish splitting, the document has " + tot + " paragraphs.");
     }
+
+    @Async
+    public void processXml(Xml xml) throws IOException, JSONException {
+        logger.info("Start get string of xml file " + xml.getFilename());
+
+        String filepath = path + xml.getFilepath();
+        String transpath = filepath + "_translation.xml";
+        String transStr;
+        XmlTagContent xmltag;
+
+        FileSystemResource res = new FileSystemResource(filepath);
+        InputStream in = res.getInputStream();
+
+        byte[] bdata = FileCopyUtils.copyToByteArray(in);
+        String xmlStr = new String(bdata, StandardCharsets.UTF_8);
+
+//        xml.setXmlString(xmlStr.substring(0,10));
+//        logger.info(xmlStr);
+        Pattern pattern = Pattern.compile("(<(\\w+)[^</>]*>)([^<>]+)(</(\\w+)>)");
+        Matcher matcher = pattern.matcher(xmlStr);
+        StringBuffer stringBuffer = new StringBuffer();
+
+        while (matcher.find()) {
+            String label1 = matcher.group(1);
+            String tag1 = matcher.group(2);
+            String content = matcher.group(3);
+            String label2 = matcher.group(4);
+            String tag2 = matcher.group(5);
+
+            if (!tag1.equals(tag2)) {
+                continue;
+            }
+
+            JSONObject dataJson = new JSONObject(translationService.translate(content));
+            JSONArray dataArray = dataJson.getJSONArray("trans_result");
+            JSONObject info = dataArray.getJSONObject(0);
+            String translation = info.getString("dst");
+
+//            String translation = dummyTrans(content);
+
+            transStr = String.format("%s%s%s", label1, translation, label2);
+            matcher.appendReplacement(stringBuffer, transStr);
+
+            xmltag = new XmlTagContent();
+            xmltag.setXmlId(xml.getId());
+            xmltag.setTag(tag1);
+            xmltag.setTagContent(content);
+            xmltag.setTagTranslation(translation);
+
+            xmlTagContentRepository.save(xmltag);
+
+//            logger.info("finish: " + xmltag.getId()+ "|" + xmltag.getTag()+ "|" + xmltag.getTagTranslation());
+        }
+        matcher.appendTail(stringBuffer);
+
+        FileOutputStream fileOutputStream = new FileOutputStream(transpath, true);
+        fileOutputStream.write(stringBuffer.toString().getBytes());
+        fileOutputStream.close();
+
+        xml.setStatus(4);
+        xmlRepository.save(xml);
+
+        logger.info("Finish processing xml file");
+    }
+
 }

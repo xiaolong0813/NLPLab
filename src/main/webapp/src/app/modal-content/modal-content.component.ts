@@ -4,6 +4,7 @@ import { BsModalRef } from "ngx-bootstrap";
 
 import { MessageService } from "../services/message.service";
 import { FileService  } from "../services/file.service";
+import {el} from "@angular/platform-browser/testing/src/browser_util";
 
 @Component({
   selector: 'modal-content',
@@ -61,6 +62,7 @@ export class ModalContentComponent {
     this.modalRef.hide();
   }
 
+  // 绑定change事件
   handleFileInput(files: FileList) {
     this.fileToUpload = files.item(0);
   }
@@ -86,7 +88,7 @@ export class ModalContentComponent {
       // this.formData.append("threshold", this.defaultThreshold.toString());
 
       this.fileService.uploadFiles(this.formData)
-        .subscribe(message=> {
+        .subscribe(message => {
           // this.messageService.new_alert(message.status_code, message.message);
           if (message.status_code == 200) {
             this.messageService.new_alert(message.status_code, message.message);
@@ -119,7 +121,6 @@ export class ModalContentComponent {
           //   this.fileService.newAlerts(message.data);
           // }
         });
-
     } else if (this.filetype == 'rfq') {
       //  Upload RFQ file
       if (this.fileToUpload.type != "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
@@ -134,6 +135,21 @@ export class ModalContentComponent {
         .subscribe(message=> {
           if (message.status_code == 200) {
             this.messageService.new_alert(message.status_code, message.message);
+            location.reload();
+          }
+        });
+      // upload xml file
+    } else if (this.filetype == 'xml') {
+      if (this.fileToUpload.type != "text/xml")  {
+        this.messageService.new_alert(-1, "Please upload a file with .xml extension.");
+        return;
+      }
+      this.formData.append("file", this.fileToUpload, this.fileToUpload.name);
+      this.formData.append("fileType", "3");
+      this.fileService.uploadFiles(this.formData)
+        .subscribe(mes => {
+          if (mes.status_code ==200) {
+            this.messageService.new_alert(mes.status_code, mes.message);
             location.reload();
           }
         });

@@ -6,6 +6,7 @@ import { DeviationsComponent } from "./deviations/deviations.component";
 import { RfqComponent } from "./rfq/rfq.component";
 import { SettingsComponent } from "./settings/settings.component";
 import { HelpComponent } from "./help/help.component";
+import { TranslationComponent} from "./translation/translation.component";
 
 const routes: Routes = [
   { path: '', redirectTo: '/index', pathMatch: 'full' },
@@ -15,6 +16,7 @@ const routes: Routes = [
   // { path: 'devlist/:type', component: DeviationsComponent},
   { path: 'rfq', component: RfqComponent },
   { path: 'settings', component: SettingsComponent },
+  { path: 'trans', component: TranslationComponent },
   { path: 'help', component: HelpComponent }
 ];
 

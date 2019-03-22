@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.json.Json;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.sql.Timestamp;
@@ -35,6 +36,12 @@ public class FileController {
     private DocumentRepository documentRepository;
 
     @Autowired
+    private XmlRepository xmlRepository;
+
+//    @Autowired
+//    private TypeRepository typeRepository;
+
+    @Autowired
     private FileProcessService fileProcessService;
 
     private HttpHeaders getHeaders() {
@@ -44,6 +51,13 @@ public class FileController {
         headers.add("Expires", "0");
         return headers;
     }
+
+//    @GetMapping(path = "/testurl/")
+//    public Message testurl(@RequestParam("xml_id") String xml_id) {
+//        Message mes = new Message();
+//        mes.setMessage("response are" + xml_id);
+//        return mes;
+//    }
 
     @GetMapping(path = "/getProcessing/{fileType}")
     public Iterable<Document> getProcessing(@PathVariable String fileType) {
@@ -57,6 +71,12 @@ public class FileController {
         return documentRepository.findByFiletypeOrderByIdDesc(Integer.parseInt(fileType));
     }
 
+    @GetMapping(path = "/getAllXMLs")
+    public Iterable<Xml> getAllXMLs() {
+        logger.info("Return all the xml files");
+        return xmlRepository.findAllByOrderByIdDesc();
+    }
+
     @DeleteMapping
     public Message deleteRFQ() {
         documentRepository.deleteAll();
@@ -65,6 +85,16 @@ public class FileController {
         message.setMessage("All the documents are removed.");
         logger.info("Remove all the documents");
         return message;
+    }
+
+    @DeleteMapping(path = "/allXmls")
+    public Message deleteXML() {
+        xmlRepository.deleteAll();
+        Message mes = new Message();
+        mes.setStatus_code(200);
+        mes.setMessage("All the Xml files are removed");
+        logger.info("Remove all the xml files");
+        return mes;
     }
 
     @GetMapping(path = "/downloadXlsx/{docId}")
@@ -95,6 +125,25 @@ public class FileController {
                 .body(resource);
     }
 
+    @GetMapping(path = "/downloadXml/{xmlId}")
+    public ResponseEntity<Resource> downloadXml(@PathVariable Long xmlId) throws IOException {
+//        Optional<Xml> xmlOpt = xmlRepository.findById(xmlId);
+//        Xml xml = xmlOpt.get();
+        Xml xml = xmlRepository.findById(xmlId).get();
+
+        String xmlpath = path + xml.getFilepath();
+        File newFile = new File(xmlpath + "_translation.xml");
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(newFile));
+
+        logger.info("Return downloadable xml file");
+
+        return ResponseEntity.ok()
+                .headers(getHeaders())
+                .contentLength(newFile.length())
+                .contentType(MediaType.parseMediaType("text/xml"))
+                .body(resource);
+    }
+
     @GetMapping(path = "/processDoc/")
     public Message processDoc(@RequestParam("doc_id") String doc_id_str,
                               @RequestParam("model") String model_str,
@@ -106,6 +155,9 @@ public class FileController {
         Integer rfqVar = Integer.parseInt(rfqvar_str);
         Integer simAlgo = Integer.parseInt(simalgo_str);
         Integer level = Integer.parseInt(level_str);
+//        logger.info("rfqvar is " + rfqvar_str);
+//        logger.info("simalgo is " + simalgo_str);
+//        logger.info("Level is " + level_str);
 
         Message message = new Message();
         Optional<Document> doc_opt = documentRepository.findById(docId);
@@ -142,6 +194,8 @@ public class FileController {
         String filepath = path + fileUrl;
 
         Integer fileType = Integer.parseInt(params.getParameter("fileType"));
+//        Long typeid = Long.parseLong(params.getParameter("type"));
+//        Double threshold = Double.parseDouble(params.getParameter("threshold"));
 
         if (!file.isEmpty()) {
             try {
@@ -158,6 +212,11 @@ public class FileController {
                 doc.setFilename(filename);
                 doc.setFilepath(fileUrl);
                 doc.setFiletype(fileType);
+//                Type type = typeRepository.findById(typeid).get();
+//                doc.setType(type.getName());
+//                doc.setStatus(0);
+//                doc.setThreshold(threshold);
+//                documentRepository.save(doc);
 
                 doc.setStatus(1);
                 documentRepository.save(doc);
@@ -165,6 +224,8 @@ public class FileController {
                     logger.info("Start processing deviation document");
                     fileProcessService.processDev(doc);
                 } else if (fileType == 1) {
+//                    logger.info("Start splitting RFQ sentences");
+//                    fileProcessService.processDocSentence(doc);
                     logger.info("Upload RFQ Document");
                     doc.setStatus(2);
                     documentRepository.save(doc);
@@ -174,6 +235,15 @@ public class FileController {
                     fileProcessService.processDocSentence(doc);
 //                    doc.setStatus(2);
 //                    documentRepository.save(doc);
+                } else if (fileType == 3) {
+                    logger.info("Upload XML file");
+//                    logger.info("Start achieving tag contents");
+                    Xml xml = new Xml();
+                    xml.setFilename(filename);
+                    xml.setFilepath(fileUrl);
+//                    fileProcessService.processXml(xml);
+                    xml.setStatus(2);
+                    xmlRepository.save(xml);
                 }
 
                 Iterable<Document> docs = documentRepository.findByStatusAndFiletype(1, fileType);

@@ -6,6 +6,7 @@ import { Observable, of } from 'rxjs';
 import { Message } from "../message";
 import {Document} from "../document";
 import {tap} from "rxjs/operators";
+import {Xmls} from "../xmls";
 
 const httpOptions = {
   headers: {'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
@@ -17,14 +18,19 @@ const httpOptions = {
 export class FileService {
   private api = 'http://localhost:7890/api/file/';  // URL to web api
   processedFile: Document[];
+  processedXML: Xmls[];
   alert_new = "none";
 
   constructor(
     private http:HttpClient
   ) { }
 
+  // testurl(xml_id):Observable<Message> {
+  //   return this.http.get<Message>(this.api + 'testurl/', {params:{'xml_id' : xml_id.toString()}});
+  // }
+
   uploadFiles(formData: FormData): Observable<Message> {
-    return this.http.post<Message>(this.api+'upload', formData);
+    return this.http.post<Message>(this.api + 'upload', formData);
   }
 
   getProcessingFiles(fileType: number): Observable<Document[]> {
@@ -35,8 +41,16 @@ export class FileService {
     return this.http.get<Document[]>(this.api+'getAll/'+fileType);
   }
 
+  getAllXMLs(): Observable<Xmls[]> {
+    return this.http.get<Xmls[]>(this.api + 'getAllXMLs');
+  }
+
   removeAllDOC(): Observable<Message> {
     return this.http.delete<Message>(this.api)
+  }
+
+  removeAllXmls(): Observable<Message> {
+    return this.http.delete<Message>(this.api + 'allXmls')
   }
 
   processDoc(doc_id: number, model: number, rfqvar: number, simalgo: number, level:number): Observable<Message> {
@@ -75,6 +89,18 @@ export class FileService {
     );
   }
 
+  downloadXML(xml_id: number): Observable<Blob> {
+    return this.http.get(this.api + 'downloadXml/' + xml_id, {
+      headers: {'Accept': "text/xml"},
+      responseType: 'blob'
+    }).pipe(
+      tap(
+        data => console.log(data),
+        error => console.log(error)
+      )
+    )
+  }
+
   newAlerts(docs: Document[]) {
     this.alert_new = "";
     this.processedFile = docs;
@@ -83,7 +109,13 @@ export class FileService {
     // }, 5000)
   }
 
+  newXMLAlerts(xmls: Xmls[]) {
+    this.alert_new = "";
+    this.processedXML = xmls
+  }
+
   close_alert() {
     this.alert_new = "none";
   }
+
 }

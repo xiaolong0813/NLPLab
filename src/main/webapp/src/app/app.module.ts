@@ -19,6 +19,8 @@ import { RfqComponent } from "./rfq/rfq.component";
 import { SettingsComponent } from "./settings/settings.component";
 import { HelpComponent } from "./help/help.component";
 import { MessagesComponent } from './messages/messages.component';
+import { TranslationComponent } from './translation/translation.component';
+import { TranslationDetailComponent } from './translation-detail/translation-detail.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +33,9 @@ import { MessagesComponent } from './messages/messages.component';
     RfqComponent,
     SettingsComponent,
     HelpComponent,
-    MessagesComponent
+    MessagesComponent,
+    TranslationComponent,
+    TranslationDetailComponent,
   ],
   imports: [
     BrowserModule,

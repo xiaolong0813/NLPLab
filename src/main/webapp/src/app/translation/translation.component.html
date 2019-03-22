@@ -1,0 +1,90 @@
+<button type="button" class="btn btn-info" (click)="openModelWithComponent()">Upload</button>
+<button style="float: right" type="button" class="btn btn-danger" (click)="removeAllXmls()">Delete All</button>
+
+<hr>
+<!--&lt;!&ndash;是否显示状态栏与有无new alert绑定&ndash;&gt;-->
+<div class="alert alert-fixed alert-dismissible fade show alert-danger"
+     [style.display]="fileService.alert_new"
+     role="alert">
+  File(s) <span *ngFor="let msg of fileService.processedXML">"{{ msg.filename }}" </span> is(are) under processed.
+  <!--点击后执行close_alert即使display属性为none-->
+  <button type="button" (click)="fileService.close_alert()" class="close" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+  <div class="row">
+    <!--col-12表示一行显示一个-->
+    <div class="col-12">
+      <!--tab-content可以设置导航与面板通过id对应-->
+      <div class="tab-content">
+        <!--呈现大型复杂数据的Angular组件-->
+        <!--定义相关属性-->
+        <ngx-datatable
+        class="bootstrap"
+        [rows]="xmls"
+        [limit]="8"
+        [columnMode]="'force'"
+        [headerHeight]="50"
+        [footerHeight]="50"
+        [rowHeight]="'auto'">
+          <!--index列-->
+          <ngx-datatable-column name="No.">
+            <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
+              {{column.name}}
+            </ng-template>
+            <ng-template let-rowIndex="rowIndex" ngx-datatable-cell-template>
+              {{rowIndex+1}}
+            </ng-template>
+          </ngx-datatable-column>
+
+          <!--文件名列-->
+
+          <ngx-datatable-column name="Filename">
+            <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
+              {{column.name}}
+            </ng-template>
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+              {{row.filename}}
+            </ng-template>
+          </ngx-datatable-column>
+
+          <!--文件状态列-->
+          <ngx-datatable-column name="Status">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{ column.name }}
+            </ng-template>
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+              <span *ngIf="row.status == 2" class="badge badge-primary">Unprocessed</span>
+              <span *ngIf="row.status == 3" class="badge badge-info">Translating</span>
+              <span *ngIf="row.status == 4" class="badge badge-success">Finished</span>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <!--&lt;!&ndash;文档处理列&ndash;&gt;-->
+          <ngx-datatable-column name="Operations">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{ column.name }}
+            </ng-template>
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+              <!--<button *ngIf="row.status == 2" class="btn btn-sm btn-primary" (click)="openModelWithTransComponent(row.id)">Translate</button>-->
+              <button *ngIf="row.status == 2" class="col-4 btn btn-sm btn-primary" (click)="processXml(row.id)">Translate</button>
+              <!--<button *ngIf="row.status == 2" class="btn btn-sm btn-primary" (click)="testurl(row.id)">Translate</button>-->
+              <button *ngIf="row.status == 4" class="col-4 btn btn-sm btn-primary" (click)="listDetails(row.id)">Check</button>
+              <button *ngIf="row.status == 4" class="offset-1 col-4 btn btn-sm btn-info" (click)="downloadXML(row.id)">Download</button>
+              <!--&nbsp;<button class="btn btn-sm btn-danger">Delete</button>-->
+            </ng-template>
+          </ngx-datatable-column>
+
+        </ngx-datatable>
+
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="tab-content">
+        <app-translation-detail #transDetail></app-translation-detail>
+      </div>
+    </div>
+
+  </div>

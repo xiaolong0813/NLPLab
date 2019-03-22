@@ -22,6 +22,9 @@
         <a class="nav-link" routerLink="/settings">Settings</a>
       </li>
       <li class="nav-item" routerLinkActive="active">
+        <a class="nav-link" routerLink="/trans">Translation</a>
+      </li>
+      <li class="nav-item" routerLinkActive="active">
         <a class="nav-link" routerLink="/help">Help</a>
       </li>
     </ul>
@@ -30,6 +33,8 @@
 
 <main role="main" class="container">
   <app-messages></app-messages>
+
+  <!--路由出口-->
   <router-outlet></router-outlet>
 </main>
 
