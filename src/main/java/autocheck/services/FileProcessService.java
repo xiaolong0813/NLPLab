@@ -433,6 +433,8 @@ public class FileProcessService {
 //        xml.setXmlString(xmlStr.substring(0,10));
 //        logger.info(xmlStr);
         Pattern pattern = Pattern.compile("(<(\\w+)[^</>]*>)([^<>]+)(</(\\w+)>)");
+        Pattern chiPat = Pattern.compile("[\u4e00-\u9fa5]+");
+
         Matcher matcher = pattern.matcher(xmlStr);
         StringBuffer stringBuffer = new StringBuffer();
 
@@ -443,16 +445,27 @@ public class FileProcessService {
             String label2 = matcher.group(4);
             String tag2 = matcher.group(5);
 
-            if (!tag1.equals(tag2)) {
+            if (!tag1.equals(tag2) ||
+                content == null ||
+                "".equals(content) ||
+                content.replaceAll("\\s*","").length() < 2) {
                 continue;
             }
 
             JSONObject dataJson = new JSONObject(translationService.translate(content));
+
+            if (dataJson.has("error_msg")) {continue;}
+
+//            logger.info(tag1 + "|" + content + "|" + translationService.translate(content));
+
             JSONArray dataArray = dataJson.getJSONArray("trans_result");
             JSONObject info = dataArray.getJSONObject(0);
             String translation = info.getString("dst");
 
-//            String translation = dummyTrans(content);
+            Matcher chiMatch = chiPat.matcher(translation);
+
+            if (content.toLowerCase().equals(translation.toLowerCase()) || !chiMatch.find()) {
+                translation = content;}
 
             transStr = String.format("%s%s%s", label1, translation, label2);
             matcher.appendReplacement(stringBuffer, transStr);
