@@ -434,8 +434,10 @@ public class FileProcessService {
 //        logger.info(xmlStr);
         Pattern pattern = Pattern.compile("(<(\\w+)[^</>]*>)([^<>]+)(</(\\w+)>)");
         Pattern chiPat = Pattern.compile("[\u4e00-\u9fa5]+");
-
         Matcher matcher = pattern.matcher(xmlStr);
+
+        Pattern pTrim = Pattern.compile("[ \\f\\n\\r\\t\\v]{1,}");
+
         StringBuffer stringBuffer = new StringBuffer();
 
         while (matcher.find()) {
@@ -445,14 +447,14 @@ public class FileProcessService {
             String label2 = matcher.group(4);
             String tag2 = matcher.group(5);
 
-            if (!tag1.equals(tag2) ||
-                content == null ||
-                "".equals(content) ||
-                content.replaceAll("\\s*","").length() < 2) {
+            Matcher mTrim = pTrim.matcher(content);
+            String updateContent= mTrim.replaceAll(" ").replaceAll("^(\\s)*|(\\s)*$", "");
+
+            if (!tag1.equals(tag2) || updateContent.length() < 2) {
                 continue;
             }
 
-            JSONObject dataJson = new JSONObject(translationService.translate(content));
+            JSONObject dataJson = new JSONObject(translationService.translate(updateContent));
 
             if (dataJson.has("error_msg")) {continue;}
 
@@ -464,7 +466,7 @@ public class FileProcessService {
 
             Matcher chiMatch = chiPat.matcher(translation);
 
-            if (content.toLowerCase().equals(translation.toLowerCase()) || !chiMatch.find()) {
+            if (!chiMatch.find()) {
                 translation = content;}
 
             transStr = String.format("%s%s%s", label1, translation, label2);
@@ -478,7 +480,8 @@ public class FileProcessService {
 
             xmlTagContentRepository.save(xmltag);
 
-//            logger.info("finish: " + xmltag.getId()+ "|" + xmltag.getTag()+ "|" + xmltag.getTagTranslation());
+            logger.info("finish: " + xmltag.getId()+ "|" + xmltag.getTag()+ "|" +
+                    xmltag.getTagContent()+ "|" + xmltag.getTagTranslation());
         }
         matcher.appendTail(stringBuffer);
 
@@ -491,5 +494,10 @@ public class FileProcessService {
 
         logger.info("Finish processing xml file");
     }
+
+//    public String processString(String string) {
+//
+//
+//    }
 
 }

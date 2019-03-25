@@ -38,6 +38,9 @@ public class FileController {
     @Autowired
     private XmlRepository xmlRepository;
 
+    @Autowired
+    private XmlTagContentRepository xmlTagContentRepository;
+
 //    @Autowired
 //    private TypeRepository typeRepository;
 
@@ -90,10 +93,13 @@ public class FileController {
     @DeleteMapping(path = "/allXmls")
     public Message deleteXML() {
         xmlRepository.deleteAll();
+//        logger.info("before: " + xmlTagContentRepository.findAll().toString());
+        xmlTagContentRepository.deleteAll();
+//        logger.info("after: " + xmlTagContentRepository.findAll().toString());
         Message mes = new Message();
         mes.setStatus_code(200);
-        mes.setMessage("All the Xml files are removed");
-        logger.info("Remove all the xml files");
+        mes.setMessage("All the Xml files and translation records are removed");
+        logger.info("Remove all the xml files and translation records");
         return mes;
     }
 
