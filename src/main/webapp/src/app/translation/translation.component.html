@@ -70,9 +70,9 @@
             </ng-template>
             <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
               <!--<button *ngIf="row.status == 2" class="btn btn-sm btn-primary" (click)="openModelWithTransComponent(row.id)">Translate</button>-->
-              <button *ngIf="row.status == 2" class="col-3 btn btn-sm btn-primary" (click)="processXml(row.id)">Translate</button>
+              <button *ngIf="row.status == 2" class="col-4 btn btn-sm btn-primary" (click)="processXml(row.id)">Translate</button>
               <!--<button *ngIf="row.status == 2" class="btn btn-sm btn-primary" (click)="testurl(row.id)">Translate</button>-->
-              <button *ngIf="row.status == 4 || row.status == 6" class="col-3 btn btn-sm btn-primary" (click)="listDetails(row.id)">Check</button>
+              <button *ngIf="row.status == 4 || row.status == 6" class="col-4 btn btn-sm btn-primary" (click)="listDetails(row.id)">Check</button>
               <button *ngIf="row.status == 4" class="offset-1 col-6 btn btn-sm btn-info" (click)="GenerateXML(row.id)">Generate XML</button>
               <button *ngIf="row.status == 6" class="offset-1 col-6 btn btn-sm btn-success" (click)="downloadXML(row.id)">Download XML</button>
               <!--&nbsp;<button class="btn btn-sm btn-danger">Delete</button>-->
