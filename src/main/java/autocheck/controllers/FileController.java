@@ -70,7 +70,8 @@ public class FileController {
     @GetMapping(path = "/getProcessing/{fileType}")
     public Iterable<Document> getProcessing(@PathVariable String fileType) {
         logger.info("Return documents under processing");
-        return documentRepository.findByStatusAndFiletype(1, Integer.parseInt(fileType));
+//        return documentRepository.findByStatusAndFiletype(1, Integer.parseInt(fileType));
+        return documentRepository.findByStatus(1);
     }
 
     @GetMapping(path="/getAll/{fileType}")
@@ -175,9 +176,6 @@ public class FileController {
         Integer rfqVar = Integer.parseInt(rfqvar_str);
         Integer simAlgo = Integer.parseInt(simalgo_str);
         Integer level = Integer.parseInt(level_str);
-//        logger.info("rfqvar is " + rfqvar_str);
-//        logger.info("simalgo is " + simalgo_str);
-//        logger.info("Level is " + level_str);
 
         Message message = new Message();
         Optional<Document> doc_opt = documentRepository.findById(docId);
@@ -264,6 +262,10 @@ public class FileController {
 //                    fileProcessService.processXml(xml);
                     xml.setStatus(2);
                     xmlRepository.save(xml);
+
+                    // Set xml document to status 4
+                    doc.setStatus(4);
+                    documentRepository.save(doc);
                 }
 
                 Iterable<Document> docs = documentRepository.findByStatusAndFiletype(1, fileType);

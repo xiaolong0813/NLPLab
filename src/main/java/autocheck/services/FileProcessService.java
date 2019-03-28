@@ -349,23 +349,31 @@ public class FileProcessService {
             int para_tot = newParagraphs.size();
             // Get old paragraphs from database
             Iterable<Sentence> paras = sentenceRepository.findAll();
-            Collection<Future<Boolean>> results_para = new ArrayList<>(para_tot);
+            Collection<Future<List<String>>> results_para = new ArrayList<>(para_tot);
+
+            List<XWPFRun> pruns;
+
             for (XWPFParagraph paragraph: newParagraphs) {
+                // Check Highlight
+                pruns = paragraph.getRuns();
+                if (pruns.size() == 0 || !pruns.get(0).isHighlighted()) continue;
                 results_para.add(itemProcessService.checkSimilarPara(paragraph.getText(), paras));
             }
 
             // wait for all threads
-            int para_num = 0;
-            for (Future<Boolean> result: results_para) {
+//            int para_num = 0;
+            for (Future<List<String>> result: results_para) {
                 try {
-                    Boolean checkSim = result.get();
-                    if (!checkSim) {
-                        newParagraph = newParagraphs.get(para_num);
-                        for (XWPFRun pRun: newParagraph.getRuns()) {
-                            pRun.getCTR().addNewRPr().addNewHighlight().setVal(STHighlightColor.LIGHT_GRAY);
-                        }
+                    List<String> checkSim = result.get();
+                    if (checkSim.get(1).equals("True")) {
+//                        To Determine
+//                        newParagraph = newParagraphs.get(para_num);
+//                        for (XWPFRun pRun: newParagraph.getRuns()) {
+//                            pRun.getCTR().addNewRPr().addNewHighlight().setVal(STHighlightColor.LIGHT_GRAY);
+//                        }
+                        logger.info(checkSim.get(0));
                     }
-                    para_num += 1;
+//                    para_num += 1;
                 } catch (InterruptedException | ExecutionException e) {
                     //handle thread error
                 }

@@ -75,16 +75,22 @@ public class ItemProcessService {
     }
 
     @Async
-    public Future<Boolean> checkSimilarPara(String para_text, Iterable<Sentence> paras) {
+    public Future<List<String>> checkSimilarPara(String para_text, Iterable<Sentence> paras) {
+        ArrayList<String> list = new ArrayList<>();
         Double maxValue = 0.0;
         Integer simAlgo = parameterRepository.findByName("Similarity Algorithm").get(0).getValue().intValue();
         for (Sentence para:paras) {
             maxValue = Math.max(maxValue, getSimValue(cleanSent(para.toString()), cleanSent(para_text), simAlgo));
         }
-        if (maxValue > 0.9)
-            return new AsyncResult<>(Boolean.TRUE);
-        else
-            return new AsyncResult<>(Boolean.FALSE);
+        list.add(para_text);
+        if (maxValue > 0.9) {
+            list.add("True");
+            return new AsyncResult<>(list);
+        }
+        else {
+            list.add("False");
+            return new AsyncResult<>(list);
+        }
     }
 
     @Async
