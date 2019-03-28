@@ -5,4 +5,5 @@ export class Xmls {
   filepath: string;
   status: number;
   threshold: number;
+  xmlString: string;
 }

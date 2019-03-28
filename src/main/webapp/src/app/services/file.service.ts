@@ -101,6 +101,10 @@ export class FileService {
     )
   }
 
+  // downloadXML(xml_id: number): Observable<Xmls> {
+  //   return this.http.get<Xmls>(this.api + 'downloadXml/' + xml_id)
+  // }
+
   newAlerts(docs: Document[]) {
     this.alert_new = "";
     this.processedFile = docs;

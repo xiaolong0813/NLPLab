@@ -11,12 +11,13 @@
   [style.display]=display
   class="bootstrap"
   [rows]="xmltag"
-  [limit]="10"
+  [limit]="15"
   [columnMode]="'force'"
   [headerHeight]="50"
   [footerHeight]="50"
+  [scrollbarH]="true"
   [rowHeight]="'auto'">
-  <ngx-datatable-column name="No.">
+  <ngx-datatable-column name="No." [width]="50">
     <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
       {{ column.name }}
     </ng-template>
@@ -25,7 +26,7 @@
     </ng-template>
   </ngx-datatable-column>
 
-  <ngx-datatable-column name="Label">
+  <ngx-datatable-column name="Label" [width]="50">
     <ng-template let-column="column" ngx-datatable-header-template>
       {{ column.name }}
     </ng-template>
@@ -34,7 +35,7 @@
     </ng-template>
   </ngx-datatable-column>
 
-  <ngx-datatable-column name="Label Content">
+  <ngx-datatable-column name="Label Content" [width]="300">
     <ng-template let-column="column" ngx-datatable-header-template>
       {{ column.name }}
     </ng-template>
@@ -43,14 +44,59 @@
     </ng-template>
   </ngx-datatable-column>
 
-  <ngx-datatable-column name="Label Translation">
+  <ngx-datatable-column name="Label Translation" [width]="300">
     <ng-template let-column="column" ngx-datatable-header-template>
       {{ column.name }}
     </ng-template>
-    <ng-template let-row="row" ngx-datatable-cell-template>
-      {{ row.tagTranslation }}
+    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+      <span *ngIf="row.status == 'uneditable'">{{ row.tagTranslation }}</span>
+      <!--<span >      </span>-->
+      <div style="width: 100%;height: 100%;display: block;
+      padding: 0px;
+      position: relative; overflow: auto">
+        <textarea style="resize: none; width: 300px; height: 150px"
+          *ngIf="row.status == 'editable'"
+          [className]="'tag_'+row.id"
+          required="required"
+          [value]="row.tagTranslation">
+        </textarea>
+      </div>
+
+
     </ng-template>
   </ngx-datatable-column>
+
+  <ngx-datatable-column name="Options" [width]="80">
+    <ng-template let-column="column" ngx-datatable-header-template>
+      {{ column.name }}
+    </ng-template>
+    <ng-template let-row="row" style="text-align: right" ngx-datatable-cell-template>
+      <!--<button *ngIf="row.status == 'uneditable'" (click)="changeStatus(row)"></button>-->
+        <i *ngIf="row.status == 'uneditable'"
+           (click)="changeToEdit(row)"
+           style="color: darkcyan"
+           class="fa fa-pencil fa-2x"></i>
+
+      <!--<button type="submit"></button>-->
+        <i *ngIf="row.status == 'editable'"
+           style="color: black;"
+            (click)="saveUpdate(row)" class="fa fa-check fa-2x"></i>
+
+      <!--<button type="button"></button>-->
+        <i *ngIf="row.status == 'uneditable'"
+          (click)="deleteTranslation(row.id)"
+           style="color: red;"
+           class="fa fa-trash-o fa-2x offset-2"></i>
+
+        <i *ngIf="row.status == 'editable'"
+          (click)="cancelEdit(row)"
+           style="color: red;"
+           class="fa fa-times fa-2x offset-2"></i>
+
+    </ng-template>
+  </ngx-datatable-column>
+
+
 
 
 </ngx-datatable>

@@ -5,6 +5,9 @@ import com.google.common.collect.Iterables;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.CoreSentence;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -24,10 +27,14 @@ import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.impl.STA
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHighlightColor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
+import org.springframework.boot.autoconfigure.freemarker.FreeMarkerTemplateAvailabilityProvider;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
+import org.xm.similarity.util.StringUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +43,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 
@@ -421,7 +429,7 @@ public class FileProcessService {
 
         String filepath = path + xml.getFilepath();
         String transpath = filepath + "_translation.xml";
-        String transStr;
+        String tempStr;
         XmlTagContent xmltag;
 
         FileSystemResource res = new FileSystemResource(filepath);
@@ -429,6 +437,8 @@ public class FileProcessService {
 
         byte[] bdata = FileCopyUtils.copyToByteArray(in);
         String xmlStr = new String(bdata, StandardCharsets.UTF_8);
+
+        List<String> tagList = new ArrayList<String>();
 
 //        xml.setXmlString(xmlStr.substring(0,10));
 //        logger.info(xmlStr);
@@ -469,25 +479,29 @@ public class FileProcessService {
             if (!chiMatch.find()) {
                 translation = content;}
 
-            transStr = String.format("%s%s%s", label1, translation, label2);
-            matcher.appendReplacement(stringBuffer, transStr);
-
             xmltag = new XmlTagContent();
             xmltag.setXmlId(xml.getId());
             xmltag.setTag(tag1);
             xmltag.setTagContent(content);
             xmltag.setTagTranslation(translation);
-
             xmlTagContentRepository.save(xmltag);
 
-            logger.info("finish: " + xmltag.getId()+ "|" + xmltag.getTag()+ "|" +
-                    xmltag.getTagContent()+ "|" + xmltag.getTagTranslation());
+            tagList.add(Long.toString(xmltag.getId()));
+
+            tempStr = String.format("%s\\${tag%s}%s", label1, xmltag.getId().toString(), label2);
+            matcher.appendReplacement(stringBuffer, tempStr);
+
+//            logger.info("finish: " + xmltag.getId()+ "|" + xmltag.getTag()+ "|" +
+//                    xmltag.getTagContent()+ "|" + xmltag.getTagTranslation());
         }
         matcher.appendTail(stringBuffer);
 
-        FileOutputStream fileOutputStream = new FileOutputStream(transpath, true);
-        fileOutputStream.write(stringBuffer.toString().getBytes());
-        fileOutputStream.close();
+        xml.setXmlString(stringBuffer.toString());
+        xml.setXmlTagIdArray(String.join(",", tagList));
+
+//        FileOutputStream fileOutputStream = new FileOutputStream(transpath, true);
+//        fileOutputStream.write(stringBuffer.toString().getBytes());
+//        fileOutputStream.close();
 
         xml.setStatus(4);
         xmlRepository.save(xml);
@@ -495,9 +509,46 @@ public class FileProcessService {
         logger.info("Finish processing xml file");
     }
 
-//    public String processString(String string) {
-//
-//
-//    }
+    @Async
+    public void generateXML(Xml xml) throws IOException, TemplateException {
+        logger.info("Start create xml file " + xml.getFilename());
 
+        String filepath = path + xml.getFilepath();
+        String transpath = filepath + "_translation.xml";
+
+        String xmlTempStr = xml.getXmlString();
+//        List<String> tagIdList = Arrays.asList(xml.getXmlTagIdArray().split(","));
+
+        Pattern pattern = Pattern.compile("\\$\\{tag(\\d+)\\}");
+        Matcher matcher = pattern.matcher(xmlTempStr);
+
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            Long tagId = Long.parseLong(matcher.group(1));
+            String translation = xmlTagContentRepository.findById(tagId).get().getTagTranslation();
+            matcher.appendReplacement(sb, translation);
+        }
+        matcher.appendTail(sb);
+
+        FileOutputStream fileOutputStream = new FileOutputStream(transpath, false);
+        fileOutputStream.write(sb.toString().getBytes());
+        fileOutputStream.close();
+
+        xml.setStatus(6);
+        xmlRepository.save(xml);
+
+        logger.info("Finish creating xml file");
+
+//        Map<String, String> tempMap = new HashMap<>();
+//        List<Long> tagIdList = xml.getXmlTagIdArray();
+
+//        for (Long tagId : tagIdList) {
+//            String translation = xmlTagContentRepository.findById(tagId).get().getTagTranslation();
+//            tempMap.put(String.format("tag%s", tagId.toString()), translation);
+//        }
+//
+//        StringWriter translationXml = new StringWriter();
+//        Configuration configuration = new Configuration();
+//        new Template("template", new StringReader(xmlTempStr), configuration).process(tempMap, translationXml);
+    }
 }

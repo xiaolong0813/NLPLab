@@ -74,28 +74,40 @@ export class TranslationComponent implements OnInit {
   }
 
   listDetails(xml_id: number) {
-    this.transDetail.getTranslation(xml_id);
+    this.transDetail.xml_id = xml_id;
+    this.transDetail.getTranslation();
+    // console.log(xml_id)
   }
 
 
   downloadXML(xml_id: number) {
-    this.fileService.downloadXML(xml_id)
-      .subscribe(data => {
-        console.log('download xml file');
-        saveAs(data);
-      })
+    if (confirm("Do you want to download xml file based on current translations? ")) {
+      this.fileService.downloadXML(xml_id)
+        .subscribe(data => {
+          console.log('download xml file');
+          console.log(data);
+          saveAs(data);
+        })
+    }
   }
 
   removeAllXmls() {
-    if (confirm("Are you sure to remove all the Xml files?")) {
+    if (confirm("Are you sure to remove all the Xml files (including all translation)?")) {
       this.fileService.removeAllXmls()
         .subscribe(mes => {
-          this.messageService.new_alert(mes.status_code, mes.message)
+          this.messageService.new_alert(mes.status_code, mes.message);
           window.location.reload(true)
         })
     }
   }
 
 
-
+  GenerateXML(xmlId: number) {
+    this.transService.generateXML(xmlId)
+      .subscribe(mes => {
+        if (mes.status_code == 200) {
+          location.reload()
+        }
+      })
+  }
 }

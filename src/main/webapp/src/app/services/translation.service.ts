@@ -6,9 +6,9 @@ import {Message} from "../message";
 
 
 const httpOptions = {
-  // headers: new HttpHeaders({'Content-Type': 'multipart/form-data'})
-  headers: {'Accept': "text/xml"},
-  responseType: 'blob'
+  headers: new HttpHeaders({'Content-Type': 'application/json'})
+  // headers: {'Accept': "text/xml"},
+  // responseType: 'blob'
 };
 
 @Injectable({
@@ -30,14 +30,24 @@ export class TranslationService {
     return this.http.get<Message>(this.api + 'testurl/', {params:{'xml_id' : xml_id.toString()}});
   }
 
-
-
-  // getTagContent(xml_id: number):Observable<> {
-  //
-  // }
-
-
   getTranslation(xml_id : number): Observable<XmlTagContent[]> {
     return this.http.get<XmlTagContent[]>(this.api + 'getTags/' + xml_id);
+  }
+
+  deleteTranslation(tagId : number): Observable<Message> {
+    return this.http.delete<Message>(this.api + 'deleteTag/' + tagId)
+  }
+
+  updateTranslation(xmlId: number ,tagId: number, updateTranslation: string): Observable<Message> {
+    return this.http.post<Message>(this.api + 'update', {
+    "id" : tagId.toString(),
+      "xmlId" : xmlId.toString(),
+      "tagTranslation" : updateTranslation
+    },
+    httpOptions)
+  }
+
+  generateXML(xmlId: number): Observable<Message> {
+    return this.http.get<Message>(this.api + 'generateXML/' + xmlId)
   }
 }

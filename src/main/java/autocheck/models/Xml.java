@@ -3,6 +3,7 @@ package autocheck.models;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 public class Xml {
@@ -14,8 +15,11 @@ public class Xml {
     private String filename;
     private String filepath;
     private Integer status;
+
     @Lob
     private String xmlString;
+
+    private String xmlTagIdArray;
 
     public Long getId() {
         return id;
@@ -56,4 +60,20 @@ public class Xml {
     public void setXmlString(String xmlString) {
         this.xmlString = xmlString;
     }
+
+    public String getXmlTagIdArray() {
+        return xmlTagIdArray;
+    }
+
+    public void setXmlTagIdArray(String xmlTagIdArray) {
+        this.xmlTagIdArray = xmlTagIdArray;
+    }
+
+//    public List<Long> getXmlTagIdArray() {
+//        return xmlTagIdArray;
+//    }
+//
+//    public void setXmlTagIdArray(List<Long> xmlTagIdArray) {
+//        this.xmlTagIdArray = xmlTagIdArray;
+//    }
 }

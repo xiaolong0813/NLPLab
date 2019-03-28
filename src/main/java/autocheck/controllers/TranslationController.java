@@ -2,6 +2,8 @@ package autocheck.controllers;
 
 import autocheck.models.*;
 import autocheck.services.FileProcessService;
+import freemarker.template.TemplateException;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.apache.logging.log4j.LogManager;
@@ -35,11 +37,81 @@ public class TranslationController {
         return mes;
     }
 
+//    @PostMapping(path = "/update")
+//    public Message updateTranslation(HttpServletRequest request) {
+//        Message mes = new Message();
+//        logger.info(request.getParameterValues("tagId"));
+//        String tagId = request.getParameter("tagId");
+//        String updateTrans = request.getParameter("updateTrans");
+//        logger.info("the tag " + tagId + " translation updated to " + updateTrans);
+//        mes.setStatus_code(200);
+//        mes.setMessage("The tag " + tagId + " has been update to " + updateTrans);
+//
+//        return mes;
+//    }
+
     @GetMapping(path = "/getTags/{xml_id}")
     public Iterable<XmlTagContent> getTranslation(@PathVariable String xml_id) {
         logger.info("Return all translated tag contents");
         Long xmlId = Long.parseLong(xml_id);
         return xmlTagContentRepository.findByXmlIdOrderById(xmlId);
+    }
+
+
+    @DeleteMapping(path = "/deleteTag/{tag_Id}")
+    public Message deleteTag(@PathVariable String tag_Id) {
+        Long tagId = Long.parseLong(tag_Id);
+        XmlTagContent xmlTagToDelete = xmlTagContentRepository.findById(tagId).get();
+        xmlTagToDelete.setTagTranslation(xmlTagToDelete.getTagContent());
+        xmlTagContentRepository.save(xmlTagToDelete);
+
+        Xml xml = xmlRepository.findById(xmlTagToDelete.getXmlId()).get();
+        xml.setStatus(4);
+        xmlRepository.save(xml);
+
+//        xmlTagContentRepository.deleteById(tagId);
+        logger.info("The tag " + tag_Id + " 's translation has been deleted, original content would be kept");
+
+        Message mes = new Message();
+        mes.setStatus_code(200);
+        mes.setMessage("The tag " + tag_Id + " 's translation has been deleted, original content would be kept");
+        return mes;
+    }
+
+    @PostMapping(path = "/update")
+    public Message updateTranslation(@RequestBody XmlTagContent xmlTagContent) {
+//        logger.info(xmlTagContent.getId() + "|" + xmlTagContent.getTagTranslation());
+        XmlTagContent xmlTagToUpdate = xmlTagContentRepository.findById(xmlTagContent.getId()).get();
+        xmlTagToUpdate.setTagTranslation(xmlTagContent.getTagTranslation());
+        xmlTagContentRepository.save(xmlTagToUpdate);
+
+        Xml xml = xmlRepository.findById(xmlTagContent.getXmlId()).get();
+        xml.setStatus(4);
+        xmlRepository.save(xml);
+
+        logger.info("Updated xmlTag is: " + ReflectionToStringBuilder.toString(xmlTagToUpdate));
+
+        Message mes = new Message();
+        mes.setStatus_code(200);
+        mes.setMessage("Update: " + ReflectionToStringBuilder.toString(xmlTagToUpdate));
+
+        return mes;
+    }
+
+    @GetMapping(path = "generateXML/{xmlId}")
+    public Message generateXML(@PathVariable Long xmlId) throws IOException, TemplateException {
+        Xml xml = xmlRepository.findById(xmlId).get();
+
+        Message mes = new Message();
+        if (xml.getStatus() == 4) {
+            xml.setStatus(5);
+            xmlRepository.save(xml);
+            logger.info("Start generating xml file");
+            fileProcessService.generateXML(xml);
+        }
+        mes.setStatus_code(200);
+        mes.setMessage("Start generating xml file");
+        return mes;
     }
 
 
@@ -64,8 +136,7 @@ public class TranslationController {
                 logger.info("Start processing xml file");
                 fileProcessService.processXml(xml);
             }
-//            mes.setData();
-            mes.setData(xmlRepository.findById(xmlId));
+//            mes.setData(xmlRepository.findById(xmlId));
             mes.setStatus_code(200);
             mes.setMessage("Start processing xml file");
             return mes;

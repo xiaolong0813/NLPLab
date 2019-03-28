@@ -5,8 +5,10 @@ import autocheck.services.FileProcessService;
 import autocheck.services.TranslationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -18,7 +20,10 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.json.Json;
 import javax.servlet.http.HttpServletRequest;
+import javax.sql.rowset.serial.SerialBlob;
 import java.io.*;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Optional;
 
@@ -149,6 +154,15 @@ public class FileController {
                 .contentType(MediaType.parseMediaType("text/xml"))
                 .body(resource);
     }
+
+//    @GetMapping(path = "/downloadXml/{xmlId}")
+//    public Xml downloadXml(@PathVariable Long xmlId) {
+//        Xml xml = xmlRepository.findById(xmlId).get();
+////        fileProcessService.processXmlString(xml);
+//        logger.info("Return downloadable xml file: " + xml.getFilename());
+////        Blob blob = new SerialBlob(xml.getXmlString().getBytes());
+//        return xml;
+//    }
 
     @GetMapping(path = "/processDoc/")
     public Message processDoc(@RequestParam("doc_id") String doc_id_str,
