@@ -3,15 +3,15 @@
 
 <hr>
 <!--&lt;!&ndash;是否显示状态栏与有无new alert绑定&ndash;&gt;-->
-<div class="alert alert-fixed alert-dismissible fade show alert-danger"
-     [style.display]="fileService.alert_new"
-     role="alert">
-  File(s) <span *ngFor="let msg of fileService.processedXML">"{{ msg.filename }}" </span> is(are) under processed.
-  <!--点击后执行close_alert即使display属性为none-->
-  <button type="button" (click)="fileService.close_alert()" class="close" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
+<!--<div class="alert alert-fixed alert-dismissible fade show alert-danger"-->
+     <!--[style.display]="fileService.alert_new"-->
+     <!--role="alert">-->
+  <!--File(s) <span *ngFor="let msg of fileService.processedXML">"{{ msg.filename }}" </span> is(are) under processed.-->
+  <!--&lt;!&ndash;点击后执行close_alert即使display属性为none&ndash;&gt;-->
+  <!--<button type="button" (click)="fileService.close_alert()" class="close" aria-label="Close">-->
+    <!--<span aria-hidden="true">&times;</span>-->
+  <!--</button>-->
+<!--</div>-->
 
   <div class="row">
     <!--col-12表示一行显示一个-->
@@ -55,11 +55,26 @@
               {{ column.name }}
             </ng-template>
             <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-              <span *ngIf="row.status == 2" class="badge badge-primary">Unprocessed</span>
-              <span *ngIf="row.status == 3" class="badge badge-info">Translating</span>
-              <span *ngIf="row.status == 4" class="badge badge-success">Finish Translation</span>
-              <span *ngIf="row.status == 5" class="badge badge-info">Generating File</span>
-              <span *ngIf="row.status == 6" class="badge badge-success">Finish Generation</span>
+              <span *ngIf="row.status == 2">
+                <i class="fa fa-check-circle-o fa-2x fa-fw"></i>
+                 <i>Unprocessed</i>
+              </span>
+              <span *ngIf="row.status == 3">
+                <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i>
+                 <i>Translating...</i>
+              </span>
+              <span *ngIf="row.status == 4">
+                <i class="fa fa-check-circle-o fa-2x fa-fw"></i>
+                 <i>Translation Done</i>
+              </span>
+              <span *ngIf="row.status == 5">
+                <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i>
+                 <i>Generating...</i>
+              </span>
+              <span *ngIf="row.status == 6">
+                <i class="fa fa-check-circle fa-2x fa-fw"></i>
+                 <i>Generation Done</i>
+              </span>
             </ng-template>
           </ngx-datatable-column>
 
@@ -86,7 +101,7 @@
 
     <div class="col-12">
       <div class="tab-content">
-        <app-translation-detail #transDetail></app-translation-detail>
+        <app-translation-detail #transDetail (changeStatus)="getXMLs()"></app-translation-detail>
       </div>
     </div>
 

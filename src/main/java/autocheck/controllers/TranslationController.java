@@ -74,7 +74,7 @@ public class TranslationController {
 
         Message mes = new Message();
         mes.setStatus_code(200);
-        mes.setMessage("The tag " + tag_Id + " 's translation has been deleted, original content would be kept");
+        mes.setMessage("Delete Successfully");
         return mes;
     }
 
@@ -93,7 +93,7 @@ public class TranslationController {
 
         Message mes = new Message();
         mes.setStatus_code(200);
-        mes.setMessage("Update: " + ReflectionToStringBuilder.toString(xmlTagToUpdate));
+        mes.setMessage("Update Successfully!");
 
         return mes;
     }
