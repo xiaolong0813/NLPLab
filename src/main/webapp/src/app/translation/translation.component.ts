@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Renderer2, ViewChild} from '@angular/core';
 
 import { TranslationService} from "../services/translation.service";
 import { Xmls} from "../xmls";
@@ -26,6 +26,8 @@ export class TranslationComponent implements OnInit {
 
 
   constructor(
+    // element selector
+    private render2: Renderer2,
     private modalService: BsModalService,
     private transService: TranslationService,
     private fileService : FileService,
@@ -55,19 +57,13 @@ export class TranslationComponent implements OnInit {
 
   }
 
-  testurl(xml_id : number) {
-    console.log("start to test :");
-    this.transService.testurl(xml_id)
-      .subscribe(mes => {
-        console.log(mes.message)
-      })
-  }
 
   processXml(xml_id: number) {
     this.transService.processXml(xml_id)
       .subscribe(mes => {
         if(mes.status_code == 200) {
-          location.reload();
+          this.getXMLs();
+          // location.reload();
           // console.log(mes.data)
         }
       })
@@ -76,7 +72,7 @@ export class TranslationComponent implements OnInit {
   listDetails(xml_id: number) {
     this.transDetail.xml_id = xml_id;
     this.transDetail.getTranslation();
-    // console.log(xml_id)
+    console.log(xml_id)
   }
 
 
@@ -96,7 +92,8 @@ export class TranslationComponent implements OnInit {
       this.fileService.removeAllXmls()
         .subscribe(mes => {
           this.messageService.new_alert(mes.status_code, mes.message);
-          window.location.reload(true)
+          this.getXMLs();
+          this.transDetail.display='none';
         })
     }
   }
@@ -106,7 +103,7 @@ export class TranslationComponent implements OnInit {
     this.transService.generateXML(xmlId)
       .subscribe(mes => {
         if (mes.status_code == 200) {
-          location.reload()
+          this.getXMLs();
         }
       })
   }

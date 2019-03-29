@@ -1,15 +1,18 @@
-import {Component, ElementRef, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, OnInit, Output, Renderer2, ViewChild} from '@angular/core';
 import { XmlTagContent } from "../XmlTagContent";
 import {FileService} from "../services/file.service";
 import {TranslationService} from "../services/translation.service";
 import {id} from "@swimlane/ngx-datatable/release/utils";
+import {MessageService} from "../services/message.service";
 
+import * as $ from "jquery"
 
 @Component({
   selector: 'app-translation-detail',
   templateUrl: './translation-detail.component.html',
   styleUrls: ['./translation-detail.component.scss']
 })
+
 export class TranslationDetailComponent implements OnInit {
 
   public xmltag: XmlTagContent[];
@@ -21,11 +24,16 @@ export class TranslationDetailComponent implements OnInit {
   constructor(
     private render2: Renderer2,
     private fileService: FileService,
-    private transService: TranslationService
+    private transService: TranslationService,
+    private messageService: MessageService
     ) { }
 
   ngOnInit() {
   }
+
+  // 被监听
+  @Output()
+  changeStatus: EventEmitter<boolean> = new EventEmitter();
 
   getTranslation() {
     this.display = "";
@@ -42,6 +50,8 @@ export class TranslationDetailComponent implements OnInit {
   changeToEdit(tag : any) {
     // console.log("edit:" + tag)
     tag.status = 'editable';
+    console.log(tag)
+
     // console.log(tag)
   }
 
@@ -52,7 +62,8 @@ export class TranslationDetailComponent implements OnInit {
       .subscribe(mes => {
         if (mes.status_code == 200) {
           this.getTranslation();
-          // console.log(mes.message);
+          this.messageService.new_alert(mes.status_code, mes.message);
+          this.changeStatus.emit(true);
         }
       });
   }
@@ -62,8 +73,10 @@ export class TranslationDetailComponent implements OnInit {
       this.transService.deleteTranslation(tagId)
         .subscribe(mes => {
           if (mes.status_code == 200) {
-            console.log("tag " + tagId + " of xml " + this.xml_id + " is deleted successfully");
-            this.getTranslation()
+            // console.log("tag " + tagId + " of xml " + this.xml_id + " is deleted successfully");
+            this.getTranslation();
+            this.messageService.new_alert(mes.status_code, mes.message);
+            this.changeStatus.emit(true);
           }
         })
     }
