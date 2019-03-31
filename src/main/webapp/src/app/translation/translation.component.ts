@@ -9,6 +9,8 @@ import {FileService} from "../services/file.service";
 import {log} from "util";
 import {TranslationDetailComponent} from "../translation-detail/translation-detail.component";
 
+import { interval } from "rxjs";
+
 import { saveAs } from 'file-saver';
 
 @Component({
@@ -24,6 +26,10 @@ export class TranslationComponent implements OnInit {
   @ViewChild('transDetail')
   transDetail : TranslationDetailComponent;
 
+  //emit value in sequence every 1 second
+  public source = interval(3000);
+  //output: 0,1,2,3,4,5....
+  public subscribe;
 
   constructor(
     // element selector
@@ -36,7 +42,11 @@ export class TranslationComponent implements OnInit {
 
   ngOnInit() {
     this.getXMLs();
-    // this.fileService
+    this.subscribe = this.source.subscribe(val => this.getXMLs());
+  }
+
+  ngOnDestroy() {
+    this.subscribe.unsubscribe();
   }
 
   getXMLs(): void {
@@ -51,12 +61,6 @@ export class TranslationComponent implements OnInit {
     };
     this.modalRef = this.modalService.show(ModalContentComponent, {initialState});
   }
-
-
-  openModelWithTransComponent(id: number) {
-
-  }
-
 
   processXml(xml_id: number) {
     this.transService.processXml(xml_id)

@@ -15,6 +15,8 @@ import { FileService } from "../services/file.service";
 import { MessageService } from "../services/message.service";
 import { ModalRfqComponent } from "../modal-rfq/modal-rfq.component";
 
+import { interval } from "rxjs";
+
 @Component({
   selector: 'app-rfq',
   templateUrl: './rfq.component.html',
@@ -26,6 +28,12 @@ export class RfqComponent implements OnInit{
   // defaultThreshold: number;
   defaultSimilarityAlgo: number;
   modalRef: BsModalRef;
+
+  //emit value in sequence every 1 second
+  public source = interval(3000);
+  //output: 0,1,2,3,4,5....
+  public subscribe;
+
   constructor(
     private modalService: BsModalService,
     private typeService: TypeService,
@@ -38,6 +46,7 @@ export class RfqComponent implements OnInit{
     // this.getTypes();
     // this.getParams();
     this.getDocs();
+    this.subscribe = this.source.subscribe(val => this.getDocs());
     this.fileService.getProcessingFiles(1)
       .subscribe(data=> {
         this.fileService.close_alert();
@@ -49,6 +58,10 @@ export class RfqComponent implements OnInit{
       .subscribe(params=>{
         this.defaultSimilarityAlgo = params[1].value;
       });
+  }
+
+  ngOnDestroy() {
+    this.subscribe.unsubscribe();
   }
 
   // getTypes(): void {
