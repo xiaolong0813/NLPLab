@@ -61,17 +61,18 @@ export class TranslationComponent implements OnInit {
 
   ngOnInit() {
     this.getXMLs();
+
+    // update by xxl
     this.newMessageRefresh();
     this.overallIntervalRefresh();
 
-    // this.setSelectedXml()
     // update by sf
+    // this.getXMLs();
     // this.subscribe = this.source.subscribe(val => {
-    //   this.getXMLs();
     // }
   }
 
-  // trigger as leaving this component
+  // update by sf, trigger as leaving this component
   ngOnDestroy() {
     console.log("destroy");
     // this.subscribe.unsubscribe();
