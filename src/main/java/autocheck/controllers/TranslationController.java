@@ -116,8 +116,10 @@ public class TranslationController {
 
 
     @GetMapping(path = "/processXml/")
-    public Message processXml(@RequestParam("xml_id") String xml_id_str) throws Exception {
+    public Message processXml(@RequestParam("xml_id") String xml_id_str,
+                              @RequestParam("transParam") String transParam) throws Exception {
         Long xmlId = Long.parseLong(xml_id_str);
+        int tp = Integer.parseInt(transParam);
 
         Message mes = new Message();
         Optional<Xml> xml_opt = xmlRepository.findById(xmlId);
@@ -134,7 +136,7 @@ public class TranslationController {
                 xml.setStatus(3);
                 xmlRepository.save(xml);
                 logger.info("Start processing xml file");
-                fileProcessService.processXml(xml);
+                fileProcessService.processXml(xml, tp);
             }
 //            mes.setData(xmlRepository.findById(xmlId));
             mes.setStatus_code(200);

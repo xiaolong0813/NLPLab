@@ -80,6 +80,18 @@ public class FileController {
         return documentRepository.findByFiletypeOrderByIdDesc(Integer.parseInt(fileType));
     }
 
+    @GetMapping(path = "/getOneXml/{xmlId}")
+    public Xml getOneXml(@PathVariable String xmlId) {
+        Long xmlid = Long.parseLong(xmlId);
+        Optional<Xml> xml = xmlRepository.findById(xmlid);
+        logger.info("Return xml " + xmlId);
+        if (!xml.isPresent()) {
+            logger.info("Cannot find xml " + xmlId);
+            return null;
+        }
+        return xml.get();
+    }
+
     @GetMapping(path = "/getAllXMLs")
     public Iterable<Xml> getAllXMLs() {
         logger.info("Return all the xml files");

@@ -53,10 +53,22 @@
             {{ column.name }}
           </ng-template>
           <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-            <span *ngIf="row.status == 1" class="badge badge-info">Splitting</span>
-            <span *ngIf="row.status == 2" class="badge badge-primary">Unprocessed</span>
-            <span *ngIf="row.status == 3" class="badge badge-info">Processing</span>
-            <span *ngIf="row.status == 4" class="badge badge-success">Finished</span>
+            <span *ngIf="row.status == 1">
+              <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i>
+              <i>Splitting</i>
+            </span>
+            <span *ngIf="row.status == 2">
+              <i class="fa fa-exclamation-circle fa-2x fa-fw"></i>
+              <i>Unprocessed</i>
+            </span>
+            <span *ngIf="row.status == 3">
+              <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i>
+              <i>Processing</i>
+            </span>
+            <span *ngIf="row.status == 4">
+              <i class="fa fa-check-circle-o fa-2x fa-fw"></i>
+              <i>Finished</i>
+            </span>
           </ng-template>
         </ngx-datatable-column>
 

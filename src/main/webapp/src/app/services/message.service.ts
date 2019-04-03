@@ -1,10 +1,20 @@
 import { Injectable } from '@angular/core';
+import {Subject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
 })
 export class MessageService {
   alert_new = false;
+
+  processing = false;
+
+  // source 为被观察者对象Subject
+  // status$ 为source的订阅者
+
+  private source = new Subject<any>();
+  public status$ = this.source.asObservable();
+
   alert_type = "success";
   alert_message = "This is a message.";
 
@@ -24,6 +34,9 @@ export class MessageService {
     }
     this.alert_message = message;
     this.alert_new = true;
+
+    // 将aler_new作为返回值传给订阅者的next函数=>
+    this.source.next(this.alert_new);
 
     setTimeout(()=> {
       this.alert_new = false;

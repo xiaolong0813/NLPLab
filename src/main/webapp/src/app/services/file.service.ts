@@ -41,6 +41,10 @@ export class FileService {
     return this.http.get<Document[]>(this.api+'getAll/'+fileType);
   }
 
+  getOneXMl(xmlId: number): Observable<Xmls> {
+    return this.http.get<Xmls>(this.api + 'getOneXml/' + xmlId)
+  }
+
   getAllXMLs(): Observable<Xmls[]> {
     return this.http.get<Xmls[]>(this.api + 'getAllXMLs');
   }
@@ -121,5 +125,4 @@ export class FileService {
   close_alert() {
     this.alert_new = "none";
   }
-
 }

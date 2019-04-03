@@ -1,12 +1,14 @@
-import {Component} from "@angular/core";
+import {Component, EventEmitter, Output} from "@angular/core";
 
 import { BsModalRef } from "ngx-bootstrap";
 
 import { MessageService } from "../services/message.service";
 import { FileService  } from "../services/file.service";
 import {el} from "@angular/platform-browser/testing/src/browser_util";
+import {TranslationComponent} from "../translation/translation.component";
 
 @Component({
+  // providers:[TranslationComponent],
   selector: 'modal-content',
   template: `
       <div class="modal-header">
@@ -45,6 +47,9 @@ import {el} from "@angular/platform-browser/testing/src/browser_util";
 })
 
 export class ModalContentComponent {
+  // emit an event to be observed by other components
+  @Output() modalEvent = new EventEmitter();
+
   title: string;
   filetype: string;
   // thresholdName: string;
@@ -53,7 +58,9 @@ export class ModalContentComponent {
   formData: FormData = new FormData();
   // selectedTypeId: number = 0;
 
-  constructor(public modalRef: BsModalRef, private messageService: MessageService, private fileService: FileService) {}
+  constructor(public modalRef: BsModalRef,
+              private messageService: MessageService,
+              private fileService: FileService) {}
 
   closeModal() {
     this.formData = new FormData();
@@ -150,7 +157,9 @@ export class ModalContentComponent {
         .subscribe(mes => {
           if (mes.status_code ==200) {
             this.messageService.new_alert(mes.status_code, mes.message);
-            location.reload();
+            // location.reload();
+            // this.modalEvent.emit(null);
+            this.closeModal();
           }
         });
     }

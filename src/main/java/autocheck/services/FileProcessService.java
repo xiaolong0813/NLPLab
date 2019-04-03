@@ -36,6 +36,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.xm.similarity.util.StringUtil;
 
+import javax.xml.bind.annotation.XmlID;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -80,6 +81,9 @@ public class FileProcessService {
 
     @Value("${file.path}")
     private String path;
+
+    @Value("${dict.path}")
+    private String dictFile;
 
     private List<STHighlightColor.Enum> colorArray = Arrays.asList(
             STHighlightColor.YELLOW,
@@ -432,13 +436,29 @@ public class FileProcessService {
     }
 
     @Async
-    public void processXml(Xml xml) throws IOException, JSONException {
+    public void processXml(Xml xml, Integer transParam) throws IOException, JSONException {
         logger.info("Start get string of xml file " + xml.getFilename());
 
         String filepath = path + xml.getFilepath();
         String transpath = filepath + "_translation.xml";
         String tempStr;
         XmlTagContent xmltag;
+        Long xml_id = xml.getId();
+
+        Map<String, Map> dictMap;
+        Map<String, String> keyIndexMap = null;
+        Map<String, String> indexValueMap = null;
+        
+        Boolean keyFound = false;
+
+        logger.info(transParam);
+
+        if (transParam == 1) {
+            dictMap = getDictMap();
+            keyIndexMap = (Map) dictMap.get("key_index");
+            indexValueMap = (Map) dictMap.get("index_value");
+        }
+
 
         FileSystemResource res = new FileSystemResource(filepath);
         InputStream in = res.getInputStream();
@@ -466,10 +486,19 @@ public class FileProcessService {
             String tag2 = matcher.group(5);
 
             Matcher mTrim = pTrim.matcher(content);
-            String updateContent= mTrim.replaceAll(" ").replaceAll("^(\\s)*|(\\s)*$", "");
+            String updateContent= mTrim.replaceAll(" ").replaceAll("^(\\s)*|(\\s)*$", "").toLowerCase();
 
             if (!tag1.equals(tag2) || updateContent.length() < 2) {
                 continue;
+            }
+
+            if (transParam == 1) {
+                for (String key : keyIndexMap.keySet()) {
+                    if (updateContent.contains(key)) {
+                        keyFound = true;
+                        updateContent = updateContent.replace(key, keyIndexMap.get(key));
+                    }
+                }
             }
 
             JSONObject dataJson = new JSONObject(translationService.translate(updateContent));
@@ -481,6 +510,15 @@ public class FileProcessService {
             JSONArray dataArray = dataJson.getJSONArray("trans_result");
             JSONObject info = dataArray.getJSONObject(0);
             String translation = info.getString("dst");
+            
+            if (keyFound) {
+                Pattern keyPat = Pattern.compile("TBR\\d+");
+                Matcher keyMat = keyPat.matcher(translation);
+                while (keyMat.find()) {
+                    String tempFlag = keyMat.group();
+                    translation = translation.replaceFirst(tempFlag, indexValueMap.get(tempFlag));
+                }
+            }
 
             Matcher chiMatch = chiPat.matcher(translation);
 
@@ -488,7 +526,11 @@ public class FileProcessService {
                 translation = content;}
 
             xmltag = new XmlTagContent();
-            xmltag.setXmlId(xml.getId());
+            if (!xmlRepository.findById(xml_id).isPresent()) {
+                logger.info("xml " + xml_id.toString() + " cannot be found!");
+                break;
+            }
+            xmltag.setXmlId(xml_id);
             xmltag.setTag(tag1);
             xmltag.setTagContent(content);
             xmltag.setTagTranslation(translation);
@@ -504,19 +546,23 @@ public class FileProcessService {
         }
         matcher.appendTail(stringBuffer);
 
-        xml.setXmlString(stringBuffer.toString());
-        xml.setXmlTagIdArray(String.join(",", tagList));
+        if (xmlRepository.findById(xml_id).isPresent()) {
+            xml.setXmlString(stringBuffer.toString());
+            xml.setXmlTagIdArray(String.join(",", tagList));
 
 //        FileOutputStream fileOutputStream = new FileOutputStream(transpath, true);
 //        fileOutputStream.write(stringBuffer.toString().getBytes());
 //        fileOutputStream.close();
-
-        xml.setStatus(4);
-        xmlRepository.save(xml);
-
-        logger.info("Finish processing xml file");
+            xml.setStatus(4);
+            xmlRepository.save(xml);
+            logger.info("Finish processing xml file");
+        }
+        else {
+            logger.info("cannot find xml " + xml_id.toString());
+        }
     }
 
+//    异步线程，不阻塞主线程
     @Async
     public void generateXML(Xml xml) throws IOException, TemplateException {
         logger.info("Start create xml file " + xml.getFilename());
@@ -559,4 +605,31 @@ public class FileProcessService {
 //        Configuration configuration = new Configuration();
 //        new Template("template", new StringReader(xmlTempStr), configuration).process(tempMap, translationXml);
     }
+
+    public Map getDictMap() throws IOException {
+
+        InputStreamReader inReader = new InputStreamReader(new FileInputStream(dictFile));
+        BufferedReader bf = new BufferedReader(inReader);
+        String str;
+
+        Map<String, Map> mapBox = new HashMap<>();
+        Map<String, String> key_index = new HashMap<>(500);
+        Map<String, String> index_value = new HashMap<>(500);
+
+        int tempIndex = 1;
+
+        while ((str = bf.readLine()) != null) {
+//            System.out.println(str.split("@")[1]);
+            key_index.put(str.split("@")[1].toLowerCase(), "TBR" + tempIndex);
+            index_value.put("TBR" + tempIndex, str.split("@")[2]);
+
+            tempIndex ++;
+        }
+
+        mapBox.put("key_index", key_index);
+        mapBox.put("index_value", index_value);
+
+        return mapBox;
+    }
+
 }

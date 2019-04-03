@@ -23,7 +23,7 @@ export class TranslationService {
   ) { }
 
   processXml(xml_id):Observable<Message> {
-    return this.http.get<Message>(this.api + 'processXml/', {params:{'xml_id' : xml_id.toString()}});
+    return this.http.get<Message>(this.api + 'processXml/', {params:{'xml_id' : xml_id.toString(), "transParam" : "1"}});
   }
 
   testurl(xml_id):Observable<Message> {

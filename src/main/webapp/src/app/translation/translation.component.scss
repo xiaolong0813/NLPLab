@@ -2,3 +2,24 @@
   padding: 3rem 1.5rem;
   text-align: center;
 }
+
+.buttonClick {
+  color: white;
+  background: #17a2b8;
+  //border-color: white;
+}
+
+
+.buttonUnClick {
+  color: #17a2b8;
+  background: aliceblue;
+  border-color: #17a2b8;
+}
+
+.textBlur {
+  opacity: 0.2;
+}
+
+.textFocus {
+  opacity: 1;
+}

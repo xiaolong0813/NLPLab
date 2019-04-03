@@ -33,8 +33,12 @@
             <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
               {{column.name}}
             </ng-template>
-            <ng-template let-rowIndex="rowIndex" ngx-datatable-cell-template>
-              {{rowIndex+1}}
+            <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+              <span
+                [ngClass]="{textFocus: row.id==selectedXmlId||!selectedXmlId,
+                textBlur: row.id!=selectedXmlId}">
+                {{rowIndex+1}}
+              </span>
             </ng-template>
           </ngx-datatable-column>
 
@@ -45,7 +49,11 @@
               {{column.name}}
             </ng-template>
             <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-              {{row.filename}}
+              <span
+                [ngClass]="{textFocus: row.id==selectedXmlId||!selectedXmlId,
+                textBlur: row.id!=selectedXmlId}">
+                {{row.filename}}
+              </span>
             </ng-template>
           </ngx-datatable-column>
 
@@ -55,23 +63,33 @@
               {{ column.name }}
             </ng-template>
             <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
-              <span *ngIf="row.status == 2">
-                <i class="fa fa-check-circle-o fa-2x fa-fw"></i>
+              <span *ngIf="row.status == 2"
+                    [ngClass]="{textFocus: row.id==selectedXmlId||!selectedXmlId,
+                    textBlur: row.id!=selectedXmlId}">
+                <i class="fa fa-exclamation-circle fa-2x fa-fw"></i>
                  <i>Unprocessed</i>
               </span>
-              <span *ngIf="row.status == 3">
+              <span *ngIf="row.status == 3"
+                    [ngClass]="{textFocus: row.id==selectedXmlId||!selectedXmlId,
+                    textBlur: row.id!=selectedXmlId}">
                 <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i>
                  <i>Translating...</i>
               </span>
-              <span *ngIf="row.status == 4">
+              <span *ngIf="row.status == 4"
+                    [ngClass]="{textFocus: row.id==selectedXmlId||!selectedXmlId,
+                    textBlur: row.id!=selectedXmlId}">
                 <i class="fa fa-check-circle-o fa-2x fa-fw"></i>
                  <i>Translation Done</i>
               </span>
-              <span *ngIf="row.status == 5">
+              <span *ngIf="row.status == 5"
+                    [ngClass]="{textFocus: row.id==selectedXmlId||!selectedXmlId,
+                    textBlur: row.id!=selectedXmlId}">
                 <i class="fa fa-refresh fa-spin fa-2x fa-fw"></i>
                  <i>Generating...</i>
               </span>
-              <span *ngIf="row.status == 6">
+              <span *ngIf="row.status == 6"
+                    [ngClass]="{textFocus: row.id==selectedXmlId||!selectedXmlId,
+                    textBlur: row.id!=selectedXmlId}">
                 <i class="fa fa-check-circle fa-2x fa-fw"></i>
                  <i>Generation Done</i>
               </span>
@@ -83,13 +101,40 @@
             <ng-template let-column="column" ngx-datatable-header-template>
               {{ column.name }}
             </ng-template>
-            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <ng-template let-row="row" id="testCell" let-value="value" ngx-datatable-cell-template>
               <!--<button *ngIf="row.status == 2" class="btn btn-sm btn-primary" (click)="openModelWithTransComponent(row.id)">Translate</button>-->
-              <button *ngIf="row.status == 2" class="col-4 btn btn-sm btn-primary" (click)="processXml(row.id)">Translate</button>
+              <button
+                [ngClass]="{buttonUnClick: true}"
+                *ngIf="row.status == 2"
+                class="col-4 btn btn-sm btn-primary"
+                (click)="processXml(row.id)">
+                Translate
+              </button>
               <!--<button *ngIf="row.status == 2" class="btn btn-sm btn-primary" (click)="testurl(row.id)">Translate</button>-->
-              <button *ngIf="row.status == 4 || row.status == 6" class="col-4 btn btn-sm btn-primary" (click)="listDetails(row.id)">Check</button>
-              <button *ngIf="row.status == 4" class="offset-1 col-6 btn btn-sm btn-info" (click)="GenerateXML(row.id)">Generate XML</button>
-              <button *ngIf="row.status == 6" class="offset-1 col-6 btn btn-sm btn-success" (click)="downloadXML(row.id)">Download XML</button>
+              <!--[style.color]="getButtonColor(row.id)"-->
+              <!--[style.background]="getButtonBack(row.id)"-->
+              <button
+                [ngClass]="{buttonClick: row.id==selectedXmlId, buttonUnClick: row.id!=selectedXmlId}"
+                [id]="'checkBtn_'+row.id"
+                *ngIf="row.status == 4 || row.status == 6"
+                class="col-4 btn btn-sm"
+                (click)="listDetails(row.id)">
+                Check
+              </button>
+              <button
+                *ngIf="row.status == 4"
+                [ngClass]="{buttonUnClick: true}"
+                class="offset-1 col-6 btn btn-sm"
+                (click)="GenerateXML(row.id)">
+                Generate XML
+              </button>
+              <button
+                *ngIf="row.status == 6"
+                [ngClass]="{buttonClick: true}"
+                class="offset-1 col-6 btn btn-sm"
+                (click)="downloadXML(row.id)">
+                Download XML
+              </button>
               <!--&nbsp;<button class="btn btn-sm btn-danger">Delete</button>-->
             </ng-template>
           </ngx-datatable-column>
