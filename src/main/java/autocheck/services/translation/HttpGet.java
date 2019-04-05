@@ -33,17 +33,33 @@ class HttpGet {
 
             String sendUrl = getUrlWithQueryString(host, params);
 
-            // System.out.println("URL:" + sendUrl);
+//             System.out.println("URL:" + sendUrl);
 
             URL uri = new URL(sendUrl); // 创建URL对象
             HttpURLConnection conn = (HttpURLConnection) uri.openConnection();
+
             if (conn instanceof HttpsURLConnection) {
                 ((HttpsURLConnection) conn).setSSLSocketFactory(sslcontext.getSocketFactory());
             }
 
             conn.setConnectTimeout(SOCKET_TIMEOUT); // 设置相应超时
             conn.setRequestMethod(GET);
-            int statusCode = conn.getResponseCode();
+
+//            System.out.println(conn);
+
+//            int statusCode = conn.getResponseCode();
+
+            // update by xxl
+            int statusCode;
+            try {
+                statusCode = conn.getResponseCode();
+            } catch (Exception e) {
+//                System.out.println(e.toString());
+                return null;
+            }
+
+//            System.out.println("status code is " + statusCode);
+
             if (statusCode != HttpURLConnection.HTTP_OK) {
                 System.out.println("Http错误码：" + statusCode);
             }

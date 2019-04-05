@@ -5,7 +5,6 @@ import com.google.common.collect.Iterables;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.CoreSentence;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
@@ -29,8 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerTemplateAvailabilityProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -48,9 +50,12 @@ import java.util.regex.Pattern;
 
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
 
+//@Configuration
 @Service
 public class FileProcessService {
     private static final Logger logger= LogManager.getLogger(FileProcessService.class);
+
+    private static boolean timeCount = false;
 
     @Autowired
     private DocumentRepository documentRepository;
@@ -97,6 +102,11 @@ public class FileProcessService {
             STHighlightColor.DARK_YELLOW,
             STHighlightColor.DARK_BLUE
             );
+
+//    @Bean
+    public String testBean() {
+        return "Bean from FileProcessService";
+    }
 
     @Async
     public void processDev(Document doc) throws IOException {
@@ -449,9 +459,10 @@ public class FileProcessService {
         Map<String, String> keyIndexMap = null;
         Map<String, String> indexValueMap = null;
         
-        Boolean keyFound = false;
+        boolean keyFound = false;
+        boolean connected = false;
 
-        logger.info(transParam);
+//        logger.info(transParam);
 
         if (transParam == 1) {
             dictMap = getDictMap();
@@ -501,6 +512,31 @@ public class FileProcessService {
                 }
             }
 
+            String newTrans;
+//            int connectCount = 0;
+
+            long startTime = System.currentTimeMillis();
+            long SecCount = 0;
+
+            while (SecCount <= 10) {
+                long currentTime = System.currentTimeMillis();
+                SecCount = (currentTime - startTime) / 1000;
+                newTrans = translationService.translate(updateContent);
+                if (newTrans != null) {
+                    connected = true;
+                    break;
+                }
+                if ((System.currentTimeMillis() - startTime) / 1000 > SecCount) {
+                    System.out.println("fail to connect at " + SecCount + " seconds");
+                }
+//                connectCount++;
+            }
+
+            if (!connected) {
+                logger.info("fail to connect for " + SecCount + " seconds");
+                break;
+            }
+
             JSONObject dataJson = new JSONObject(translationService.translate(updateContent));
 
             if (dataJson.has("error_msg")) {continue;}
@@ -544,15 +580,24 @@ public class FileProcessService {
 //            logger.info("finish: " + xmltag.getId()+ "|" + xmltag.getTag()+ "|" +
 //                    xmltag.getTagContent()+ "|" + xmltag.getTagTranslation());
         }
+
         matcher.appendTail(stringBuffer);
 
-        if (xmlRepository.findById(xml_id).isPresent()) {
+        if (!connected) {
+            logger.info("fail to translate, cannot translate this file");
+
+            xml.setStatus(2);
+            xmlRepository.save(xml);
+
+            Iterator<XmlTagContent> xmlTagIt = xmlTagContentRepository.findByXmlId(xml_id).iterator();
+            while (xmlTagIt.hasNext()) {
+                XmlTagContent xtc = xmlTagIt.next();
+                xmlTagContentRepository.delete(xtc);
+            }
+        }
+        else if (xmlRepository.findById(xml_id).isPresent()) {
             xml.setXmlString(stringBuffer.toString());
             xml.setXmlTagIdArray(String.join(",", tagList));
-
-//        FileOutputStream fileOutputStream = new FileOutputStream(transpath, true);
-//        fileOutputStream.write(stringBuffer.toString().getBytes());
-//        fileOutputStream.close();
             xml.setStatus(4);
             xmlRepository.save(xml);
             logger.info("Finish processing xml file");
@@ -561,6 +606,7 @@ public class FileProcessService {
             logger.info("cannot find xml " + xml_id.toString());
         }
     }
+
 
 //    异步线程，不阻塞主线程
     @Async
