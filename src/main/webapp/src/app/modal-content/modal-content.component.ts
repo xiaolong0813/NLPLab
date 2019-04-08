@@ -99,7 +99,8 @@ export class ModalContentComponent {
           // this.messageService.new_alert(message.status_code, message.message);
           if (message.status_code == 200) {
             this.messageService.new_alert(message.status_code, message.message);
-            location.reload();
+            this.closeModal();
+            // location.reload();
             // this.closeModal();
           }
           // if (message.data != null) {
@@ -142,7 +143,8 @@ export class ModalContentComponent {
         .subscribe(message=> {
           if (message.status_code == 200) {
             this.messageService.new_alert(message.status_code, message.message);
-            location.reload();
+            this.closeModal();
+            // location.reload();
           }
         });
       // upload xml file

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {Subject} from "rxjs";
+import {interval, Subject, Subscription} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -7,7 +7,11 @@ import {Subject} from "rxjs";
 export class MessageService {
   alert_new = false;
 
-  processing = false;
+  // observer for rfq
+  // public processing;
+  public rfqStart = false;
+  public rfqEmitor = new Subject();
+  public rfqEmitor$ = this.rfqEmitor.asObservable();
 
   // source 为被观察者对象Subject
   // status$ 为source的订阅者
@@ -46,4 +50,5 @@ export class MessageService {
   close_alert() {
     this.alert_new = false;
   }
+
 }

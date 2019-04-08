@@ -15,7 +15,7 @@ import { FileService } from "../services/file.service";
 import { MessageService } from "../services/message.service";
 import { ModalRfqComponent } from "../modal-rfq/modal-rfq.component";
 
-import { interval } from "rxjs";
+import {interval, Subscription} from "rxjs";
 
 @Component({
   selector: 'app-rfq',
@@ -29,10 +29,15 @@ export class RfqComponent implements OnInit{
   defaultSimilarityAlgo: number;
   modalRef: BsModalRef;
 
+  // //emit value in sequence every 1 second
+  // public source = interval(3000);
+  // //output: 0,1,2,3,4,5....
+  // public subscribe;
+
   //emit value in sequence every 1 second
-  public source = interval(3000);
+  private source = interval(1000);
   //output: 0,1,2,3,4,5....
-  public subscribe;
+  private subscribe: Subscription;
 
   constructor(
     private modalService: BsModalService,
@@ -46,7 +51,12 @@ export class RfqComponent implements OnInit{
     // this.getTypes();
     // this.getParams();
     this.getDocs();
-    this.subscribe = this.source.subscribe(val => this.getDocs());
+    // this.subscribe = this.source.subscribe(val => this.getDocs());
+
+    this.newMessageRefresh();
+
+    this.overallIntervalRefresh();
+
     this.fileService.getProcessingFiles(1)
       .subscribe(data=> {
         this.fileService.close_alert();
@@ -61,7 +71,54 @@ export class RfqComponent implements OnInit{
   }
 
   ngOnDestroy() {
-    this.subscribe.unsubscribe();
+    console.log("destroy rfq");
+    // this.subscribe.unsubscribe();
+  }
+
+  newMessageRefresh(): void {
+    this.messageService.status$.subscribe(
+      // res = alert_new
+      res => {
+        if (res) {
+          this.getDocs();
+        }
+      }
+    )
+  }
+
+  overallIntervalRefresh(): void {
+    this.messageService.rfqEmitor$.subscribe(
+      res => {
+        console.log("get rfq response from message service");
+        if (res && !this.messageService.rfqStart) {
+          console.log("start to process rfq");
+          this.messageService.rfqStart = true;
+          this.subscribe = this.source.subscribe( val => {
+              let rfqCheck = false;
+              console.log("get all rfq file status");
+              this.getDocs();
+              for (let doc of this.docs) {
+                console.log(doc.status);
+                if (doc.status == 3) {
+                  console.log("still processing...");
+                  rfqCheck = true;
+                  break;
+                }
+              }
+              if (!rfqCheck) {
+                setTimeout(()=>{
+                  console.log("processing rfq finished!");
+                  this.messageService.rfqStart = false;
+                  this.subscribe.unsubscribe();
+                }, 2000)
+              }
+            })
+        }
+        else if (this.messageService.rfqStart) {
+          console.log("the rfq processing has started!")
+        }
+      }
+    )
   }
 
   // getTypes(): void {
@@ -164,7 +221,7 @@ export class RfqComponent implements OnInit{
         .subscribe(message=>{
           // this.reloadFlag = 1-this.reloadFlag;
           this.messageService.new_alert(message.status_code, message.message);
-          window.location.reload(true)
+          // window.location.reload(true)
         })
     }
   }

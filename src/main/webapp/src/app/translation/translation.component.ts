@@ -83,7 +83,7 @@ export class TranslationComponent implements OnInit {
       res => {
         console.log("get response from emitor");
         if (res && !this.processingStart) {
-          console.log("start to process!");
+          console.log("start to process xml!");
           this.processingStart = true;
           this.subscribe = this.source.subscribe(val => {
             let checkFileProcessing = false;
@@ -97,9 +97,12 @@ export class TranslationComponent implements OnInit {
                 }
               }
               if (!checkFileProcessing) {
-                console.log("processing finished!");
-                this.processingStart = false;
-                this.subscribe.unsubscribe();
+                setTimeout(() => {
+                  console.log("processing finished!");
+                  this.processingStart = false;
+                  this.subscribe.unsubscribe();
+                },2000)
+
               }
             }
           )

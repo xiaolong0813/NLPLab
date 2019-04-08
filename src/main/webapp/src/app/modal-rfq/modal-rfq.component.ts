@@ -119,7 +119,9 @@ export class ModalRfqComponent {
     this.fileService.processDoc(this.doc_id, this.selectedModel, this.selectedRfqVar, this.selectedSimilarityAlgo, this.selectedLevel)
       .subscribe(message => {
         if (message.status_code == 200) {
-          location.reload();
+          this.closeModal();
+          this.messageService.rfqEmitor.next(true);
+          // location.reload();
         }
       });
   }
