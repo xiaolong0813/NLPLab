@@ -123,6 +123,7 @@ public class ItemProcessService {
                 sent_text.append(sentences.get(endNo).text());
                 endNo += 1;
             }
+            if (endNo == sentences.size()) endNo -= 1;
             simValue = getSimValue(cleanSent(dev_text), cleanSent(sent_text.toString()), simAlgo);
             if (simValue > maxValue) {
                 maxValue = simValue;
