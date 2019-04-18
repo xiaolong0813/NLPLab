@@ -43,26 +43,6 @@ public class Application {
     }
     public static void main(String[] args) {
         logger.info("Start the server");
-//        logger.info("Test similarity");
-//        String A = "油脂润滑系统（如适用）";
-//        String B = "油脂润滑系统(若适用)";
-//        TextSimilarity similarity;
-//        similarity = new CosineSimilarity();
-//        logger.info(similarity.getSimilarity(A, B));
-//        similarity = new EuclideanDistanceTextSimilarity();
-//        logger.info(similarity.getSimilarity(A, B));
-//        similarity = new JaccardTextSimilarity();
-//        logger.info(similarity.getSimilarity(A, B));
-//        similarity = new JaroDistanceTextSimilarity();
-//        logger.info(similarity.getSimilarity(A, B));
-////        similarity = new JaroWinklerDistanceTextSimilarity();
-////        logger.info(similarity.getSimilarity(A, B));
-//        similarity = new ManhattanDistanceTextSimilarity();
-//        logger.info(similarity.getSimilarity(A, B));
-//        similarity = new SimHashPlusHammingDistanceTextSimilarity();
-//        logger.info(similarity.getSimilarity(A, B));
-//        similarity = new DiceTextSimilarity();
-//        logger.info(similarity.getSimilarity(A, B));
         SpringApplication.run(Application.class, args);
     }
 }
