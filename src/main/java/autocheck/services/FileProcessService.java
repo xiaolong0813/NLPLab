@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.xm.similarity.util.StringUtil;
+import sun.util.locale.LocaleObjectCache;
 
 import javax.xml.bind.annotation.XmlID;
 import java.io.*;
@@ -341,6 +342,14 @@ public class FileProcessService {
 
                     Long team_id = teamRepository.findByName(text_result.get(6)).get(0).getId();
 
+                    logger.info("newParagraph length: " + newParagraphs.size());
+                    logger.info("start row :" + startRow);
+                    logger.info("end row :" + endRow);
+
+                    logger.info("p_idx length: " + p_ids.size());
+                    logger.info("start p_idx :" + p_ids.get(startRow));
+                    logger.info("end p_idx :" + p_ids.get(endRow));
+
                     for (int p_idx = p_ids.get(startRow); p_idx < p_ids.get(endRow); ++p_idx) {
                         newParagraph = newParagraphs.get(p_idx);
                         for (XWPFRun pRun: newParagraph.getRuns()) {
@@ -537,10 +546,11 @@ public class FileProcessService {
                 break;
             }
 
-            JSONObject dataJson = new JSONObject(translationService.translate(updateContent));
+            String transResults = translationService.translate(updateContent);
+            if (transResults.contains("error_msg") || transResults.contains("error_code")) {continue;}
 
-            if (dataJson.has("error_msg")) {continue;}
-
+            JSONObject dataJson = new JSONObject(transResults);
+//            if (dataJson.has("error_msg")) {continue;}
 //            logger.info(tag1 + "|" + content + "|" + translationService.translate(content));
 
             JSONArray dataArray = dataJson.getJSONArray("trans_result");
