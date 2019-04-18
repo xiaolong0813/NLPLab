@@ -1,4 +1,14 @@
-import {Component, ElementRef, EventEmitter, OnInit, Output, Renderer2, ViewChild} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter, Input,
+  OnInit,
+  Output,
+  Renderer2,
+  SimpleChange,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import { XmlTagContent } from "../XmlTagContent";
 import {FileService} from "../services/file.service";
 import {TranslationService} from "../services/translation.service";
@@ -18,6 +28,8 @@ export class TranslationDetailComponent implements OnInit {
   public xmltag: XmlTagContent[];
   // public test;
   public display = "none";
+
+  @Input()
   public xml_id : number;
   // private updateTag: string;
 
@@ -28,8 +40,18 @@ export class TranslationDetailComponent implements OnInit {
     private messageService: MessageService
     ) { }
 
+
   ngOnInit() {
+    // this.getTranslation();
   }
+
+  // ngOnChanges(changes: SimpleChanges) {
+  //   console.log("属性变化OnChange!" + changes)
+  // }
+  //
+  // ngOnDestroy() {
+  //   console.log("trans detail destroy!")
+  // }
 
   // 被监听
   @Output()

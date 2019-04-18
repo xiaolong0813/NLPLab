@@ -5,6 +5,7 @@ import { BsModalRef } from "ngx-bootstrap";
 import { MessageService } from "../services/message.service";
 import { FileService  } from "../services/file.service";
 import {ParameterService} from "../services/parameter.service";
+import {EmitorService} from "../services/emitor.service";
 
 @Component({
   selector: 'modal-rfq',
@@ -90,7 +91,12 @@ export class ModalRfqComponent {
   selectedLevel: number;
   // defaultSimilarityAlgo: number;
 
-  constructor(public modalRef: BsModalRef, private parameterService: ParameterService, private messageService: MessageService, private fileService: FileService) {}
+  constructor(public modalRef: BsModalRef,
+              private parameterService: ParameterService,
+              private messageService: MessageService,
+              private fileService: FileService,
+              private emitorService: EmitorService,
+              ) {}
 
   closeModal() {
     // this.selectedModel = this.selectedRfqVar = 0;
@@ -119,8 +125,9 @@ export class ModalRfqComponent {
     this.fileService.processDoc(this.doc_id, this.selectedModel, this.selectedRfqVar, this.selectedSimilarityAlgo, this.selectedLevel)
       .subscribe(message => {
         if (message.status_code == 200) {
+          this.emitorService.emitEvent(this.emitorService.rfqEmitor, "refresh");
+          this.emitorService.emitEvent(this.emitorService.rfqEmitor, "timer");
           this.closeModal();
-          this.messageService.rfqEmitor.next(true);
           // location.reload();
         }
       });

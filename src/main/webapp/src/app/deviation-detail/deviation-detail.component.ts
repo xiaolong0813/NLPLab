@@ -5,6 +5,9 @@ import {FileService} from "../services/file.service";
 import {Deviation} from "../Deviation";
 import {DeviationService} from "../services/deviation.service";
 import {MessageService} from "../services/message.service";
+import {interval, Subscription} from "rxjs";
+
+import {ChangeDetectorRef} from "@angular/core";
 
 @Component({
   selector: 'app-deviation-detail',
@@ -18,7 +21,7 @@ export class DeviationDetailComponent implements OnInit{
   public devs: Deviation[];
 
   constructor(private route: ActivatedRoute, private fileService: FileService, private deviationService: DeviationService,
-              private messageService : MessageService) {
+              private changeDetector : ChangeDetectorRef) {
     // this.getDevs();
     // route.params.subscribe(params => {
       // this.typeId = +params['type'];
@@ -27,27 +30,13 @@ export class DeviationDetailComponent implements OnInit{
   }
 
   ngOnInit(): void {
+    // this.getDevs();
     // this.typeId = +this.route.snapshot.paramMap.get('type');
-    this.getDevs();
-    this.newMessageRefresh();
-    this.fileService.getProcessingFiles(0)
-      .subscribe(data=> {
-        this.fileService.close_alert();
-        if (data.length != 0) {
-          this.fileService.newAlerts(data);
-        }
-      })
-  }
+    // this.getDevs();
+    // this.getProcessingFiles();
 
-  newMessageRefresh(): void {
-    this.messageService.status$.subscribe(
-      // res = alert_new
-      res => {
-        if (res) {
-          this.getDevs();
-        }
-      }
-    )
+    // this.newMessageRefresh();
+    // this.overallIntervalRefresh();
   }
 
   // ngOnChanges(): void {
@@ -55,7 +44,10 @@ export class DeviationDetailComponent implements OnInit{
   // }
 
   getDevs(): void {
+    console.log("get all devs!");
     this.deviationService.getDevs()
-      .subscribe(devs => this.devs = devs);
+      .subscribe(devs => {
+        this.devs = devs
+      });
   }
 }

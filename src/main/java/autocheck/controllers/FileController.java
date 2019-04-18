@@ -25,6 +25,8 @@ import java.io.*;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Optional;
 
 @RestController
@@ -68,10 +70,42 @@ public class FileController {
 //    }
 
     @GetMapping(path = "/getProcessing/{fileType}")
-    public Iterable<Document> getProcessing(@PathVariable String fileType) {
+    public Iterable<Document> getProcessing(@PathVariable Integer fileType) {
         logger.info("Return documents under processing");
 //        return documentRepository.findByStatusAndFiletype(1, Integer.parseInt(fileType));
         return documentRepository.findByStatus(1);
+    }
+
+    @GetMapping(path = "/checkProcessingFiles/{fileType}")
+    public boolean checkProcessingFiles(@PathVariable Integer fileType) {
+        boolean found = false;
+        Iterable<Document> processing;
+        switch (fileType){
+            case 0:
+            case 2:
+                logger.info("Check if there are processing devs or doc sents");
+                processing = documentRepository.findByStatusAndFiletype(1, fileType);
+                if (processing.iterator().hasNext()) {
+                    found = true;
+                }
+                break;
+            case 1:
+                logger.info("Check if there are processing rfqs");
+                processing = documentRepository.findByStatusAndFiletype(3, fileType);
+                if (processing.iterator().hasNext()) {
+                    found = true;
+                }
+                break;
+            case 20:
+                logger.info("Check if there are processing devs and doc sents");
+                processing = documentRepository.findByStatusAndFiletypeOrFiletype();
+                logger.info("found results: " + processing);
+                if (processing.iterator().hasNext()) {
+                    found = true;
+                }
+                break;
+        }
+        return found;
     }
 
     @GetMapping(path="/getAll/{fileType}")
@@ -113,6 +147,7 @@ public class FileController {
         xmlRepository.deleteAll();
 //        logger.info("before: " + xmlTagContentRepository.findAll().toString());
         xmlTagContentRepository.deleteAll();
+        documentRepository.deleteAll(documentRepository.findByFiletype(3));
 //        logger.info("after: " + xmlTagContentRepository.findAll().toString());
         Message mes = new Message();
         mes.setStatus_code(200);

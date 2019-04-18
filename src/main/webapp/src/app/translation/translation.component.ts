@@ -1,7 +1,8 @@
-import {Component, ElementRef, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
 
 import { TranslationService} from "../services/translation.service";
 import { Xmls} from "../xmls";
+import { Document } from "../document";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
 import {MessageService} from "../services/message.service";
 import {ModalContentComponent} from "../modal-content/modal-content.component";
@@ -17,37 +18,31 @@ import {style} from "@angular/animations";
 
 import * as $ from "jquery"
 import {el} from "@angular/platform-browser/testing/src/browser_util";
+import {EmitorService} from "../services/emitor.service";
 
 @Component({
   selector: 'app-translation',
   templateUrl: './translation.component.html',
   styleUrls: ['./translation.component.scss'],
 })
-export class TranslationComponent implements OnInit {
+export class TranslationComponent implements OnInit, OnDestroy {
   public xmls: Xmls[];
 
-  // public selectedXmlEle: object=null;
-
-  public selectedXmlId: number=0;
+  public selectedXmlId: number;
 
   //弹窗
   modalRef: BsModalRef;
-  // private transDetails: TranslationDetailComponent
+
   @ViewChild('transDetail')
   private transDetail : TranslationDetailComponent;
 
-  // @ViewChild('testChid')
-  // testChid: ElementRef;
-
   // public processing;
-  public processingStart = false;
-  public processEmitor = new Subject();
-  public processEmitor$ = this.processEmitor.asObservable();
+  // public processingStart: boolean;
+  // public processEmitor = new Subject();
+  // public processEmitor$ = this.processEmitor.asObservable();
 
-  //emit value in sequence every 1 second
-  public source = interval(1000);
-  //output: 0,1,2,3,4,5....
-  public subscribe: Subscription;
+  public timeC = interval(1000);
+  public timeC$ : Subscription;
 
   constructor(
     // element selector
@@ -57,93 +52,102 @@ export class TranslationComponent implements OnInit {
     private transService: TranslationService,
     private fileService : FileService,
     private messageService : MessageService,
+    private emitorService: EmitorService,
   ) { }
 
   ngOnInit() {
     this.getXMLs();
 
-    // update by xxl
-    this.newMessageRefresh();
-    this.overallIntervalRefresh();
+    // 每次进入组件创建实例会重建
 
-    // update by sf
-    // this.getXMLs();
-    // this.subscribe = this.source.subscribe(val => {
+    this.checkProcessing();
+
+
+    // 订阅事件发生器.主要接受来自弹窗的通知刷新页面
+    this.newEventRefresh();
+
+    // console.log(this.transDetail)
+
+    // console.log(this.emitorService.transEmitor)
+
+    // 每次调用都会创建一个Observor。当Subject调用next方法时，会给每个observor调用next方法
+    // 相当于每次进入初始化组件都会建立一个观察者对象
+    // this.overallIntervalRefresh();
+
+    // 本地储存所选择的id，再次进入可自动获取并显示。localstorage大小限于5M
+    // console.log(localStorage.getItem("xmlId"))
+    // var localId = localStorage.getItem("xmlId");
+    // if (localId) {
+    //   this.selectedXmlId = Number(localId);
+    //   this.transDetail.xml_id = Number(localId);
+    //   this.transDetail.getTranslation();
     // }
+
   }
 
   // update by sf, trigger as leaving this component
   ngOnDestroy() {
-    console.log("destroy");
-    // this.subscribe.unsubscribe();
+    console.log("destroy trans");
+    // this.timeC$.unsubscribe()
+    if (this.timeC$) {
+      console.log("unsubscribe trans");
+      this.timeC$.unsubscribe();
+    }
+    // 取消这个组件订阅者
+    this.emitorService.clearObservors(this.emitorService.transEmitor);
+  }
+
+  checkProcessing(): void {
+    if (this.emitorService.transTimerStart) {
+      console.log("xmls processing is going on");
+      this.createTimer();
+    }
+    else {
+      console.log("no processing xmls")
+    }
+  }
+
+  newEventRefresh(): void {
+    // 创建观察者
+    this.emitorService.getEvent(this.emitorService.transEmitor).
+    subscribe(value => {
+      if (value) {
+        console.log("get alert from emitor service");
+        this.getXMLs();
+      }
+    });
   }
 
   overallIntervalRefresh(): void {
-    this.processEmitor$.subscribe(
-      res => {
-        console.log("get response from emitor");
-        if (res && !this.processingStart) {
-          console.log("start to process xml!");
-          this.processingStart = true;
-          this.subscribe = this.source.subscribe(val => {
-            let checkFileProcessing = false;
-            console.log("get all xml file status");
-              this.getXMLs();
-              for (let xml of this.xmls) {
-                if (xml.status == 3 || xml.status == 5) {
-                  console.log("still processing...");
-                  checkFileProcessing = true;
-                  break;
-                }
-              }
-              if (!checkFileProcessing) {
-                setTimeout(() => {
-                  console.log("processing finished!");
-                  this.processingStart = false;
-                  this.subscribe.unsubscribe();
-                },2000)
+      if (!this.emitorService.transTimerStart) {
+        console.log("start to process xml!");
+        this.emitorService.transTimerStart = true;
+        this.createTimer();
+      }
+      else {
+        console.log("the processing has started!")
+      }
+  }
 
+  createTimer(): void {
+    this.timeC$ =
+      this.timeC.subscribe(value => {
+          console.log("get xml status");
+          this.getXMLs();
+          this.transService.checkProcessingXML().subscribe(
+            value1 => {
+              if (!value1){
+                this.timeC$.unsubscribe();
+                this.emitorService.transTimerStart = false;
+                console.log("finish processing xmls")
+              }
+              else {
+                console.log("still processing xmls")
               }
             }
           )
         }
-        else if (this.processingStart) {
-          console.log("the processing has started!")
-        }
-      }
-    )
-  }
-
-  eachRowIntervalRefresh(xml_id) {
-    let temp = interval(3000).subscribe(val =>
-    {
-      this.getOneXml(xml_id).subscribe(xml=>{
-      if (!xml) {
-        console.log("lost!");
-        // this.subscribe.unsubscribe();
-        temp.unsubscribe();
-
-      }
-      else if (xml.status == 4) {
-        console.log("stop interval!");
-        this.getXMLs();
-        // this.subscribe.unsubscribe();
-        temp.unsubscribe();
-      }
-    })
-    }
-    );
-  }
-
-  newMessageRefresh(): void {
-    this.messageService.status$.subscribe(
-      // res = alert_new
-      res => {
-        if (res) {
-          this.getXMLs();
-        }
-      }
-    )
+      )
   }
 
   getXMLs(): void {
@@ -169,8 +173,12 @@ export class TranslationComponent implements OnInit {
         if(mes.status_code == 200) {
           this.messageService.new_alert(mes.status_code, mes.message);
 
-          this.processEmitor.next(true);
+          this.getXMLs();
 
+          // 开始持续刷新
+          this.overallIntervalRefresh()
+
+          // this.emitorService.transProcessEmitor.next(true);
           // 单个interval方法
           // this.eachRowIntervalRefresh(xml_id)
         }
@@ -185,6 +193,8 @@ export class TranslationComponent implements OnInit {
     // this.el.nativeElement.querySelector('#checkBtn_'+xml_id).style.color='red';
     this.transDetail.xml_id = xml_id;
     this.transDetail.getTranslation();
+
+    localStorage.setItem("xmlId", xml_id.toString())
     // console.log(xml_id)
   }
 
@@ -207,30 +217,111 @@ export class TranslationComponent implements OnInit {
           if (mes.status_code == 200) {
             // this.subscribe.unsubscribe();
             this.messageService.new_alert(mes.status_code, mes.message);
+
+            this.getXMLs();
+
+            // this.emitorService.emitEvent(this.emitorService.transEmitor);
             // this.getXMLs();
             this.transDetail.display='none';
             this.selectedXmlId = 0;
+
+            // console.log(this.emitorService.transProcessEmitor)
+
           }
         })
     }
   }
-
 
   GenerateXML(xmlId: number) {
     this.transService.generateXML(xmlId)
       .subscribe(mes => {
         if (mes.status_code == 200) {
           this.messageService.new_alert(mes.status_code, mes.message);
-          this.processEmitor.next(true);
-          // this.getXMLs();
+
+          this.getXMLs();
+
+          // 开始持续刷新
+          this.overallIntervalRefresh()
         }
       })
   }
 
-  // selectRow(event, row) {
-  //   this.selectedXml = row;
-  //   event.target.style = "background: green"
-  //   console.log(event.target);
+
+  // overallIntervalRefreshEmitor() : void{
+  //   this.emitorService.transProcessEmitor$.subscribe(
+  //     value => {
+  //       console.log(this.emitorService.transProcessEmitor);
+  //
+  //       console.log("get response from emitor");
+  //       if (!this.emitorService.transTimerStart) {
+  //         console.log("start to process xml!");
+  //         this.emitorService.transTimerStart = true;
+  //         this.createTimer();
+  //       }
+  //       else {
+  //         console.log("the processing has started!")
+  //       }
+  //     }
+  //   )
+  // }
+
+
+  // overallIntervalRefresh(): void {
+  // this.processEmitor$.subscribe(
+  //   res => {
+  //     console.log("get response from emitor");
+  //     if (res && !this.processingStart) {
+  //       console.log("start to process xml!");
+  //       this.processingStart = true;
+  //       this.subscribe = this.source.subscribe(val => {
+  //         let checkFileProcessing = false;
+  //         console.log("get all xml file status");
+  //           this.getXMLs();
+  //           for (let xml of this.xmls) {
+  //             if (xml.status == 3 || xml.status == 5) {
+  //               console.log("still processing...");
+  //               checkFileProcessing = true;
+  //               break;
+  //             }
+  //           }
+  //           if (!checkFileProcessing) {
+  //             setTimeout(() => {
+  //               console.log("processing finished!");
+  //               this.getXMLs();
+  //               this.processingStart = false;
+  //               this.subscribe.unsubscribe();
+  //             },2000)
+  //
+  //           }
+  //         }
+  //       )
+  //     }
+  //     else if (this.processingStart) {
+  //       console.log("the processing has started!")
+  //     }
+  //   }
+  // )
+  // }
+
+  // eachRowIntervalRefresh(xml_id) {
+  //   let temp = interval(3000).subscribe(val =>
+  //     {
+  //       this.getOneXml(xml_id).subscribe(xml=>{
+  //         if (!xml) {
+  //           console.log("lost!");
+  //           // this.subscribe.unsubscribe();
+  //           temp.unsubscribe();
+  //
+  //         }
+  //         else if (xml.status == 4) {
+  //           console.log("stop interval!");
+  //           this.getXMLs();
+  //           // this.subscribe.unsubscribe();
+  //           temp.unsubscribe();
+  //         }
+  //       })
+  //     }
+  //   );
   // }
 
 }

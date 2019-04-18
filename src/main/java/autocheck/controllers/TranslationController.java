@@ -57,6 +57,18 @@ public class TranslationController {
         return xmlTagContentRepository.findByXmlIdOrderById(xmlId);
     }
 
+    @GetMapping(path = "/checkProcessingXML")
+    public boolean checkProcessingXML() {
+        boolean found = false;
+        logger.info("Check if there are processing files");
+        Iterable<Xml> translating = xmlRepository.findAllByStatus(3);
+        Iterable<Xml> generating = xmlRepository.findAllByStatus(5);
+        if (translating.iterator().hasNext() || generating.iterator().hasNext()) {
+            found = true;
+        }
+        return found;
+    }
+
 
     @DeleteMapping(path = "/deleteTag/{tag_Id}")
     public Message deleteTag(@PathVariable String tag_Id) {

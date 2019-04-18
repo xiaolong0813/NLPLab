@@ -6,6 +6,7 @@ import { MessageService } from "../services/message.service";
 import { FileService  } from "../services/file.service";
 import {el} from "@angular/platform-browser/testing/src/browser_util";
 import {TranslationComponent} from "../translation/translation.component";
+import {EmitorService} from "../services/emitor.service";
 
 @Component({
   // providers:[TranslationComponent],
@@ -60,7 +61,8 @@ export class ModalContentComponent {
 
   constructor(public modalRef: BsModalRef,
               private messageService: MessageService,
-              private fileService: FileService) {}
+              private fileService: FileService,
+              private emitorService: EmitorService) {}
 
   closeModal() {
     this.formData = new FormData();
@@ -99,6 +101,8 @@ export class ModalContentComponent {
           // this.messageService.new_alert(message.status_code, message.message);
           if (message.status_code == 200) {
             this.messageService.new_alert(message.status_code, message.message);
+            this.emitorService.emitEvent(this.emitorService.devEmitor, "refresh");
+            this.emitorService.emitEvent(this.emitorService.devEmitor, "timer");
             this.closeModal();
             // location.reload();
             // this.closeModal();
@@ -121,9 +125,11 @@ export class ModalContentComponent {
         .subscribe(message=> {
           if (message.status_code == 200) {
             this.messageService.new_alert(message.status_code, message.message);
-            location.reload();
+            // this.emitorService.emitEvent(this.emitorService.devEmitor, "refresh");
+            this.emitorService.emitEvent(this.emitorService.devEmitor, "timer");
+            // location.reload();
             // this.messageService.new_alert(message.status_code, message.message);
-            // this.closeModal();
+            this.closeModal();
           }
           // if (message.data.length != 0) {
           //   this.fileService.newAlerts(message.data);
@@ -143,6 +149,7 @@ export class ModalContentComponent {
         .subscribe(message=> {
           if (message.status_code == 200) {
             this.messageService.new_alert(message.status_code, message.message);
+            this.emitorService.emitEvent(this.emitorService.rfqEmitor, "refresh");
             this.closeModal();
             // location.reload();
           }
@@ -159,6 +166,7 @@ export class ModalContentComponent {
         .subscribe(mes => {
           if (mes.status_code ==200) {
             this.messageService.new_alert(mes.status_code, mes.message);
+            this.emitorService.emitEvent(this.emitorService.transEmitor);
             // location.reload();
             // this.modalEvent.emit(null);
             this.closeModal();

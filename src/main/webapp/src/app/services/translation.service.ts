@@ -34,6 +34,10 @@ export class TranslationService {
     return this.http.get<XmlTagContent[]>(this.api + 'getTags/' + xml_id);
   }
 
+  checkProcessingXML(): Observable<boolean> {
+    return this.http.get<boolean>(this.api + 'checkProcessingXML')
+  }
+
   deleteTranslation(tagId : number): Observable<Message> {
     return this.http.delete<Message>(this.api + 'deleteTag/' + tagId)
   }

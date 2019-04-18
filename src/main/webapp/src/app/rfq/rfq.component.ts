@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 
 import { BsModalService } from "ngx-bootstrap";
 import { BsModalRef } from "ngx-bootstrap";
@@ -16,13 +16,15 @@ import { MessageService } from "../services/message.service";
 import { ModalRfqComponent } from "../modal-rfq/modal-rfq.component";
 
 import {interval, Subscription} from "rxjs";
+import {EmitorService} from "../services/emitor.service";
+import {el} from "@angular/platform-browser/testing/src/browser_util";
 
 @Component({
   selector: 'app-rfq',
   templateUrl: './rfq.component.html',
   styleUrls: [ './rfq.component.scss' ]
 })
-export class RfqComponent implements OnInit{
+export class RfqComponent implements OnInit,OnDestroy{
   types: Type[];
   docs: Document[];
   // defaultThreshold: number;
@@ -34,106 +36,115 @@ export class RfqComponent implements OnInit{
   // //output: 0,1,2,3,4,5....
   // public subscribe;
 
-  //emit value in sequence every 1 second
-  private source = interval(1000);
-  //output: 0,1,2,3,4,5....
-  private subscribe: Subscription;
+  public timeC = interval(1000);
+  public timeC$ : Subscription;
 
   constructor(
     private modalService: BsModalService,
     private typeService: TypeService,
     private paramService: ParameterService,
     private fileService: FileService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private emitorService: EmitorService,
   ) {}
 
   ngOnInit() {
     // this.getTypes();
     // this.getParams();
     this.getDocs();
+    this.checkProcessing();
+
+    // this.fileService.getProcessingFiles(1)
+    //   .subscribe(data=> {
+    //     this.fileService.close_alert();
+    //     if (data.length != 0) {
+    //       this.fileService.newAlerts(data);
+    //     }
+    //   });
+
+    this.getParameters();
     // this.subscribe = this.source.subscribe(val => this.getDocs());
 
-    this.newMessageRefresh();
+    this.newEventResponse();
 
-    this.overallIntervalRefresh();
+    // console.log(this.emitorService.rfqEmitor)
 
-    this.fileService.getProcessingFiles(1)
-      .subscribe(data=> {
-        this.fileService.close_alert();
-        if (data.length != 0) {
-          this.fileService.newAlerts(data);
-        }
-      });
-    this.paramService.getParameters()
-      .subscribe(params=>{
-        this.defaultSimilarityAlgo = params[1].value;
-      });
   }
 
   ngOnDestroy() {
     console.log("destroy rfq");
     // this.subscribe.unsubscribe();
+    if (this.timeC$) {
+      console.log("unsubscribe rfq");
+      this.timeC$.unsubscribe();
+    }
+    // 取消这个组件订阅者
+    this.emitorService.clearObservors(this.emitorService.rfqEmitor);
   }
 
-  newMessageRefresh(): void {
-    this.messageService.status$.subscribe(
-      // res = alert_new
-      res => {
-        if (res) {
+  checkProcessing(): void {
+    if (this.emitorService.rfqTimerStart) {
+      console.log("rfq processing is going on");
+      this.createTimer();
+    }
+    else {
+      console.log("no processing rfqs")
+    }
+  }
+
+  newEventResponse(): void {
+    // 创建观察者
+    this.emitorService.getEvent(this.emitorService.rfqEmitor).
+    subscribe(value => {
+      if (value == "refresh") {
+        console.log("get alert from rfq emitor service: refresh");
+        this.getDocs();
+      }
+      else if (value == "timer") {
+        console.log("get alert from rfq emitor service: timer");
+        if (!this.emitorService.rfqTimerStart) {
+          console.log("start to process rfq!");
+          this.emitorService.rfqTimerStart = true;
+          this.createTimer();
+        }
+        else {
+          console.log("the processing has started!")
+        }
+      }
+    });
+  }
+
+  createTimer(): void {
+    this.timeC$ =
+      this.timeC.subscribe(value => {
+          console.log("get rfq status");
           this.getDocs();
-        }
-      }
-    )
-  }
-
-  overallIntervalRefresh(): void {
-    this.messageService.rfqEmitor$.subscribe(
-      res => {
-        console.log("get rfq response from message service");
-        if (res && !this.messageService.rfqStart) {
-          console.log("start to process rfq");
-          this.messageService.rfqStart = true;
-          this.subscribe = this.source.subscribe( val => {
-              let rfqCheck = false;
-              console.log("get all rfq file status");
-              this.getDocs();
-              for (let doc of this.docs) {
-                console.log(doc.status);
-                if (doc.status == 3) {
-                  console.log("still processing...");
-                  rfqCheck = true;
-                  break;
-                }
+          this.fileService.checkProcessingFiles(1).subscribe(
+            found => {
+              if (!found){
+                console.log("finish processing rfqs")
+                this.timeC$.unsubscribe();
+                this.emitorService.rfqTimerStart = false;
               }
-              if (!rfqCheck) {
-                setTimeout(()=>{
-                  console.log("processing rfq finished!");
-                  this.messageService.rfqStart = false;
-                  this.subscribe.unsubscribe();
-                }, 2000)
+              else {
+                console.log("still processing rfqs")
               }
-            })
+            }
+          )
         }
-        else if (this.messageService.rfqStart) {
-          console.log("the rfq processing has started!")
-        }
-      }
-    )
+      )
   }
-
-  // getTypes(): void {
-  //   this.typeService.getTypes()
-  //     .subscribe(types => this.types = types)
-  // }
-
-  // getParams(): void {
-  //   this.paramService.getParameters()
-  //     .subscribe(params => this.defaultThreshold = params[1].value)
-  // }
 
   getDocs(): void {
     this.fileService.getAll(1)
       .subscribe(docs => this.docs = docs)
+  }
+
+  getParameters() : void {
+    this.paramService.getParameters()
+      .subscribe(params=>{
+        this.defaultSimilarityAlgo = params[1].value;
+      });
   }
 
   openModelWithComponent() {
@@ -192,14 +203,6 @@ export class RfqComponent implements OnInit{
     this.modalRef = this.modalService.show(ModalRfqComponent, {initialState});
   }
 
-  // processDoc(doc_id: number) {
-  //   this.fileService.processDoc(doc_id)
-  //     .subscribe(message => {
-  //       this.docs = message.data as Document[];
-  //       this.messageService.new_alert(message.status_code, message.message);
-  //     })
-  // }
-
   downloadXlsx(doc_id: number) {
     this.fileService.downloadXlsx(doc_id)
       .subscribe(data => {
@@ -221,8 +224,69 @@ export class RfqComponent implements OnInit{
         .subscribe(message=>{
           // this.reloadFlag = 1-this.reloadFlag;
           this.messageService.new_alert(message.status_code, message.message);
+
+          this.getDocs();
           // window.location.reload(true)
         })
     }
   }
+
+  // checkStatus(id: number) {
+  //   console.log(id)
+  // }
+
+  // overallIntervalRefresh(): void {
+  //   this.messageService.rfqEmitor$.subscribe(
+  //     res => {
+  //       console.log("get rfq response from message service");
+  //       if (res && !this.messageService.rfqStart) {
+  //         console.log("start to process rfq");
+  //         this.messageService.rfqStart = true;
+  //         this.subscribe = this.source.subscribe( val => {
+  //             let rfqCheck = false;
+  //             console.log("get all rfq file status");
+  //             this.getDocs();
+  //             for (let doc of this.docs) {
+  //               console.log(doc.status);
+  //               if (doc.status == 3) {
+  //                 console.log("still processing...");
+  //                 rfqCheck = true;
+  //                 break;
+  //               }
+  //             }
+  //             if (!rfqCheck) {
+  //               setTimeout(()=>{
+  //                 console.log("processing rfq finished!");
+  //                 this.getDocs();
+  //                 this.messageService.rfqStart = false;
+  //                 this.subscribe.unsubscribe();
+  //               }, 2000)
+  //             }
+  //           })
+  //       }
+  //       else if (this.messageService.rfqStart) {
+  //         console.log("the rfq processing has started!")
+  //       }
+  //     }
+  //   )
+  // }
+
+  // getTypes(): void {
+  //   this.typeService.getTypes()
+  //     .subscribe(types => this.types = types)
+  // }
+
+  // getParams(): void {
+  //   this.paramService.getParameters()
+  //     .subscribe(params => this.defaultThreshold = params[1].value)
+  // }
+
+  // processDoc(doc_id: number) {
+  //   this.fileService.processDoc(doc_id)
+  //     .subscribe(message => {
+  //       this.docs = message.data as Document[];
+  //       this.messageService.new_alert(message.status_code, message.message);
+  //     })
+  // }
+
 }

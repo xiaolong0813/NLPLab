@@ -15,6 +15,12 @@ public class DeviationController {
     @Autowired
     private DeviationRepository deviationRepository;
 
+    @Autowired
+    private DocumentRepository documentRepository;
+
+    @Autowired
+    private SentenceRepository sentenceRepository;
+
 //    @Autowired
 //    private TypeRepository typeRepository;
 
@@ -34,11 +40,17 @@ public class DeviationController {
 
     @DeleteMapping
     public Message deleteDevs() {
+        // delete devs and sents
         deviationRepository.deleteAll();
+        sentenceRepository.deleteAll();
+
+        documentRepository.deleteAll(documentRepository.findByFiletype(0));
+        documentRepository.deleteAll(documentRepository.findByFiletype(2));
+
         Message message = new Message();
         message.setStatus_code(200);
-        message.setMessage("All the deviation records are removed.");
-        logger.info("Remove all the deviation records");
+        message.setMessage("All the deviation and sentences records are removed.");
+        logger.info("Remove all the deviation and sentences records");
         return message;
     }
 }

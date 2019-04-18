@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams, HttpResponse} from "@angular/common/http";
 
-import { Observable, of } from 'rxjs';
+import {interval, Observable, of, Subscription} from 'rxjs';
 
 import { Message } from "../message";
 import {Document} from "../document";
@@ -35,6 +35,10 @@ export class FileService {
 
   getProcessingFiles(fileType: number): Observable<Document[]> {
     return this.http.get<Document[]>(this.api+'getProcessing/'+fileType);
+  }
+
+  checkProcessingFiles(fileType: number): Observable<boolean> {
+    return this.http.get<boolean>(this.api + "checkProcessingFiles/" + fileType)
   }
 
   getAll(fileType: number): Observable<Document[]> {
@@ -117,12 +121,9 @@ export class FileService {
     // }, 5000)
   }
 
-  newXMLAlerts(xmls: Xmls[]) {
-    this.alert_new = "";
-    this.processedXML = xmls
-  }
 
   close_alert() {
+    console.log("close alert!")
     this.alert_new = "none";
   }
 }
