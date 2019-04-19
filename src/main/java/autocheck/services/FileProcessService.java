@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.xm.similarity.util.StringUtil;
-import sun.util.locale.LocaleObjectCache;
+//import sun.util.locale.LocaleObjectCache;
 
 import javax.xml.bind.annotation.XmlID;
 import java.io.*;
