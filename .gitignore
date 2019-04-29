@@ -8,9 +8,6 @@
 /out
 
 /.gradle
-gradle/
-gradlew
-gradlew.bat
 
 # dependencies
 /node_modules
