@@ -16,7 +16,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.fdu'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
@@ -65,38 +65,13 @@ sourceSets {
     }
 }
 
-//processResources {
-//    dependsOn "buildAngular"
-//}
+defaultTasks('startClient', 'startServer')
 
-task buildAngular() {
-//    dependsOn "installAngular"
-    doLast{
-        exec {
-            ignoreExitValue true
-            workingDir "$webappDir"
-            commandLine "npm", "install"
-        }
-        exec {
-            workingDir "$webappDir"
-            commandLine "ng", "build"
-        }
-//        exec {
-//            workingDir "$webappDir"
-//            commandLine "ng", "serve"
-//        }
-    }
-
-//    ignoreExitValue true
-
+task startClient(type:Exec) {
+    workingDir "$webappDir"
+    commandLine './startClient.sh'
 }
 
-task installAngular() {
-    doLast{
-        exec {
-//            ignoreExitValue true
-            workingDir "$webappDir"
-            commandLine "zsh", "c", "npm", "install"
-        }
-    }
+task startServer(type:Exec) {
+    commandLine './startServer.sh'
 }

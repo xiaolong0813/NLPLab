@@ -8,6 +8,9 @@
 /out
 
 /.gradle
+gradle/
+gradlew
+gradlew.bat
 
 # dependencies
 /node_modules
@@ -31,3 +34,5 @@ Thumbs.db
 
 application.properties
 file/
+logs/
+*.log
