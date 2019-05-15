@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 @RequestMapping(path = "/api/translation")
 public class TranslationController {
     public static final Logger logger = LogManager.getLogger(TranslationController.class);

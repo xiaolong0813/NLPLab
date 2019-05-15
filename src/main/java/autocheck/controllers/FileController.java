@@ -30,8 +30,7 @@ import java.util.Iterator;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
-//@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*")
 @RequestMapping(path = "/api/file")
 public class FileController {
     private static final Logger logger= LogManager.getLogger(FileController.class);

@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 npm install & ng build
-ng serve > client.log 2>&1 &
+ng serve --host 0.0.0.0 > client.log 2>&1 &
