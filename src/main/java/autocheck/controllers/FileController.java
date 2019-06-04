@@ -21,7 +21,7 @@ import java.sql.Timestamp;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping(path = "/api/file")
 public class FileController {
     private static final Logger logger= LogManager.getLogger(FileController.class);
