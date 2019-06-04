@@ -30,6 +30,8 @@ autocheck.iml
 Thumbs.db
 
 application.properties
-file/
+file/*.xlsx
+file/*.xml
+file/*.docx
 logs/
 *.log

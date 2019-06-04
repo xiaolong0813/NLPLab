@@ -1,0 +1,461 @@
+﻿@gas turbine@燃气轮机
+@gas tubine power plant@燃气轮机动力装置
+@open cycle@开式循环
+@closed cycle@闭式循环
+@semiclosed cycle@半闭式循环
+@simple cycle@简单循环
+@regenerative cycle@回热循环
+@intercooled cycle@中间冷却循环
+@intercooled cycle@间冷循环
+@reheat cycle@再热循环
+@combined cycle@联合循环
+@single shaft gas turbine@单轴燃气轮机
+@multi shaft gas turbine@多轴燃气轮机
+@stationary gas turbine@固定式燃气轮机
+@mobile gas turbine@移动式燃气轮机
+@free piston gas turbine@自由活塞燃气轮机
+@extraction gas turbine@抽气式燃气轮机
+@bled gas turbine@抽气式燃气轮机
+@turbine@透平
+@compressor@压气机
+@combustion chamber@燃烧室
+@working fluid heater@工质加热器
+@gas generator@燃气发生器
+@regenerator@回热器
+@precooler@预冷器
+@intercooler@中间冷却器
+@evaporative cooler@蒸发冷却器
+@main gear@负荷齿轮箱
+@main gear@主齿轮箱
+@turning gear@盘车装置
+@starting equipment@启动设备
+@control system@控制系统
+@governing system@调节系统
+@fuel control system@燃料控制系统
+@speed governor@转速调节器
+@speed changer@转速变换器
+@gas temperature controller@燃气温度控制器
+@fuel flow control valve@燃料流量控制阀
+@protection system@保护系统
+@overspeed control device@超速控制装置
+@fuel shut off valve@燃料切断阀
+@overtemperature control device@超温控制装置
+@overtemperature detector@超温检测器
+@flame failure tripping device@火焰失效遮断装置
+@flame out tripping device@熄火遮断装置
+@lubrication system@润滑油系统
+@fuel treatment equipment@燃料处理设备
+@fuel supply system@燃料供给系统
+@fuel injection pump@燃料注入泵
+@air intake duct@进气道
+@exhaust duct@排气道
+@intake air filter@进气过滤器
+@silencer@消音器
+@air charging system@空气充气系统
+@blow off valve@放气阀
+@enclosures@罩壳
+@steam injection equipment@注蒸汽设备
+@water injection equipment@注水设备
+@dual fuel system@双燃料系统
+@direction of rotation@旋转方向
+@self sustaining speed@自持转速
+@constant temperature operation@恒温运行
+@constant power operation@恒功率运行
+@cooling down@冷却盘车
+@starting characteristics diagram@启动特性图
+@start@启动
+@normal start@正常启动
+@fast start@快速启动
+@black start@黑启动
+@ignition@点火
+@light off@着火
+@starting time@启动时间
+@loading time@加载时间
+@number of starts@启动次数
+@purging@清吹
+@by pass control@旁路控制
+@pressure level control@压力控制
+@combustor inspection@燃烧室检查
+@hot section inspection@热通道检查
+@hot gas path inspection@热通道检查
+@major inspection@关键（部件）检查
+@major inspection@关键部件检查
+@major overhaul@大修
+@rated output@额定输出功率
+@new and clean condition@新的和清洁的状态
+@standard rated output@标准额定输出功率
+@auxiliary loads@辅助负荷
+@site rated output@现场额定输出功率
+@peak load rated output@尖峰负荷输出功率
+@base load rated output@基本负荷额定输出功率
+@reserve peak load output@备用尖峰负荷额定输出功率
+@reserve peak load output@应急尖峰负荷额定输出功率
+@semi base load rated output@半基本负荷额定输出功率
+@semi base load rated output@中间负荷额定输出功率
+@output limit@极限输出功率
+@output performance diagram@输出功率性能图
+@shaft output@轴输出功率
+@rated speed@额定转速
+@turbine trip speed@透平遮断转速
+@idling speed@空负荷转速
+@ignition speed@点火转速
+@referred speed@折算转速
+@critical speed@临界转速
+@maximum momentary speed@飞升转速
+@steady state speed@稳态转速
+@stabilization time@稳定性时间
+@steady state incremental speed regulation@稳态转速增量调节
+@steady state speed regulation@稳态转速调节
+@thermal efficiency@热效率
+@referred thermal efficiency@折算热效率
+@fuel consumption@燃料消耗量
+@specific fuel consumption@燃料消耗率
+@heat consumption@热耗
+@heat rate@热耗率
+@heat balance@热平衡
+@specific power@比功率
+@mechanical loss@机械损失
+@site condition@现场条件
+@standard atmosphere@标准大气
+@standard reference conditions@标准参考条件
+@starting characteristics test@起动特性试验
+@protective device test@保护设备试验
+@load rejection test@甩负荷试验
+@turbine@透平
+@axial flow turbine@轴流式透平
+@radial flow turbine@径流式透平
+@power turbine@动力透平
+@compressor turbine@压气机透平
+@gas expander turbine@气体膨胀透平
+@high pressure turbine@高压透平
+@intermediate pressure turbine@中压透平
+@low pressure turbine@低压透平
+@casing@气缸
+@out casing@外气缸
+@inner casing@内气缸
+@diffuser@扩压器
+@turbine rotor@透平转子
+@turbine disc@透平轮盘
+@turbine wheel@透平叶轮
+@blade@叶片
+@blade@动叶
+@rotor blade@动叶片
+@rotor bucket@动叶片
+@stationary blade@静叶片
+@vane@静叶
+@stator@静子
+@turbine nozzle@透平喷嘴
+@turbine diahpram@透平隔板
+@variable stator blade@可调节静叶片
+@cooled blade@冷却叶片
+@stage@级
+@turbine washing equipment@透平清洗设备
+@inlet pressure@进气压力
+@turbine reference inlet temperature@透平参考进口温度
+@turbine entry temperature@透平进口温度
+@combustor outlet temperature@燃烧室出口温度
+@turbine rotor inlet temperature@透平转子进口温度
+@outlet pressure@出口压力
+@outlet temperature@出口温度
+@pressure ratio@膨胀比
+@pressure ratio@压比
+@exhaust gas flow@排气流量
+@turbine power output@透平输出功率
+@mechanical efficiency@机械效率
+@isentropic efficiency@等熵效率
+@polytropic efficiency@多变效率
+@compressor@压气机
+@axial flow compressor@轴流式压气机
+@radial flow compressor@径流式压气机
+@low pressure compressor@低压压气机
+@intermediate pressure compressor@中压压气机
+@high pressure compressor@高压压气机
+@casing@机匣
+@compressor rotor@压气机转子
+@compressor rotor@压气机转子
+@compressor wheel@压气机叶轮
+@moving blade@动叶片
+@diaphragm@隔板
+@variable stator blade@可调节静叶片
+@inlet guide vanes@进口导叶
+@outlet guide vanes@出口导叶
+@compressor intake anti icing system@压气机进气防冰系统
+@particle separator@颗粒分离器
+@inlet pressure@进口压力
+@inlet temperature@进口温度
+@outlet pressure@出口压力
+@outlet temperature@出口温度
+@pressure ratio@压比
+@inlet air flow@进口空气流量
+@bleed air@抽气
+@extraction air@抽气
+@blow off@放气
+@compressor input power@压气机输入功率
+@mechanical effiency@机械效率
+@isentropic power@等熵功率
+@isentropic efficiency@等熵效率
+@polytropic efficiency@多变效率
+@surge@喘振
+@deep stall@渐进失速
+@rotating stall@旋转失速
+@choking@堵塞
+@performance map@特性图
+@characteristic map@特性图
+@combustion chamber@燃烧室
+@can type combustor@分管形燃烧室
+@annular combustor@环形燃烧室
+@can annular combustor@环管形燃烧室
+@silo combustor@筒形燃烧室
+@reheat combustor@再热燃烧室
+@reheat combustor@加力燃烧室
+@heater@加热器
+@low emissions combustors@低排放燃烧室
+@combustion liner@火焰筒
+@combustor can@火焰筒
+@combustor bucket@火焰筒
+@flame tube@火焰筒
+@outer casing@外壳
+@cross flame tube@联焰管
+@inter connector@联焰管
+@cross fire tube@联焰管
+@cross light tube@联焰管
+@fuel injector@燃料喷嘴
+@fuel flow divider@燃料流量分配器
+@ignition equipment@点火装置
+@flame detector@火焰检测器
+@burner outlet temperature@燃烧室出口温度
+@primary zone@一次燃烧区
+@secondary zone@二次燃烧区
+@primary air@一次空气
+@secondary air@二次空气
+@fuel air ratio@燃料空气比
+@stoichiometric fuel air ratio@理论（化学计量）燃料空气比
+@equivalence ratio@当量比
+@excess air ratio@过量空气比
+@combustion intensity@燃烧强度
+@specific combustion intensity@比燃烧强度
+@combustor efficiency@燃烧室效率
+@working fluid heater efficiency@工质加热器效率
+@combustor specific pressure loss@燃烧室比压力损失
+@fuel injection pressure@燃料喷射压力
+@temperature pattern factor@温度场系数
+@regenerator@回热器
+@recuperator@表面式回热器
+@rotating regenerator@回转式回热器
+@rotating regenerator@再生式回热器
+@shell and tube recuperator@壳管式回热器
+@plate type recuperator@板式回热器
+@shell@壳体
+@heat exchanger tube@换热器管
+@heat exchanger plate@换热器板
+@header@联箱
+@matrix@蓄热体
+@end plate@端板
+@soot blower@吹灰器
+@heating surface area@受热面积
+@heat transfer rate of heating surface@受热表面的传热率
+@temperature effectiveness@温度有效度
+@energy effectiveness@能量有效度
+@final temperature difference@端差
+@unfired combined cycle@无补燃型联合循环
+@un-fired combined cycle@无补燃型联合循环
+@supplementary fired combined cycle@补燃型联合循环
+@full fired combined cycle@排气全燃型联合循环
+@combine supercharged boiler and gas turbine cycle@增压锅炉型联合循环
+@feed water heating heat recovery combined cycle@给水加热型联合循环
+@single shaft type combined cycle@单轴联合循环
+@multi shaft type combined cycle@多轴联合循环
+@combined cycle with single pressure level Rankine cyle@单压郎肯循环的联合循环
+@combined cycle with multi pressure level Rankine cycle@多压郎肯循环的联合循环
+@reheat Rankine combined cycle@再热郎肯联合循环
+@cogeneration@热电联供
+@heat recovery steam generator@余热锅炉
+@HRSG@余热锅炉
+@integrated coal gasification combined cycle@整体煤气化联合循环
+@IGCC@整体煤气化联合循环
+@fluidized bed combustion combined cycle@流化床联合循环
+@total energy system@总能系统
+@multi spool gas turbine@多转子燃气轮机
+@packaged gas turbine@箱装式燃气轮机
+@aero derivative gas turbine@航空派生（衍生）型燃气轮机
+@aircraft derivative gas turbine@航空派生（衍生）型燃气轮机
+@steam injection gas turbine@注蒸汽燃气轮机
+@variable geometry gas turbine@变几何燃气轮机
+@inlet condition@进气参数
+@outlet condition@出气参数
+@rated condition@额定工况
+@design condition@设计工况
+@operation point@运行点
+@off design condition@变工况
+@critical speed of rotor@转子临界转速
+@static balancing@静平衡
+@dynamic balancing@动平衡
+@axial thrust@轴向推力
+@dead center@死点
+@relative dead center@相对死点
+@cold starting@冷态起动
+@cold starting@冷起动
+@hot starting@热态起动
+@hot starting@热起动
+@turning@盘车
+@barring@盘车
+@thermal blockage@热（悬）挂
+@starter cut off@起动机脱扣
+@no load operation@空负荷运行
+@level pressure control@基准压力调节
+@electro hydraulic control system@电液调节系统
+@speed changer@转速变换器
+@synchronizer@转速变换器
+@speed changer@同步器
+@synchronizer@同步器
+@alarm and protection system@报警保护系统
+@low fuel pressure protection device@燃料压力过低保护装置
+@low oil pressure protection device@润滑油压过低保护装置
+@high oil temperature protection device@润滑油温过高保护装置
+@axial displacement limiting device@轴向位移保护装置
+@manual tripping device@手动遮断装置
+@actuating oil system @压力油系统
+@lagging@保温层
+@maximum continuous power@最大连续功率
+@limit power@极限功率
+@turbine trip speed@燃气轮机跳闸转速
+@speed governor droop@转速不等率
+@dead band@迟缓率
+@dead band@死区
+@idle time@惰转时间
+@heat loss@热损失
+@load dump test@甩负荷试验
+@thermodynamic performance test@热力性能试验
+@acceptance test@验收试验
+@steam and/or water injection@蒸汽和/或水的喷注
+@mass to power ratio@质量功率比
+@temperature ratio@温比
+@steam air ratio@蒸汽空气比
+@steam gas power ratio@蒸燃功比
+@power heat ratio@功热比
+@reliability@可靠性
+@availability@可用性
+@average continuous running time of gas turbine@燃气轮机平均连续运行时间
+@automatic starting time of gas turbine@燃气轮机的自动起动时间
+@centripetal turbine@向心式透平
+@power recovery turbine@能量回收透平
+@impulse turbine@冲动式透平
+@reaction turbine@反动式透平
+@corrected flow@折算流量
+@velocity ratio@速比
+@degree of reaction@反动度
+@tip hub ratio@轮毂比
+@total pressure loss coefficient@全压损失系数
+@flow coefficient@流量系数
+@velocity coefficient@速度系数
+@flow passage@通流部分
+@casscade@叶栅
+@cascade@叶栅
+@straight blade@直叶片
+@twisted blade@扭叶片
+@blade hight@叶高
+@blade hight@叶片高度
+@blade profile@叶型
+@camber line@中弧线
+@blade profile thickness@叶型厚度
+@chord@弦长
+@aspect ratio@展弦比
+@throat area@（叶栅）喉部面积
+@front@额线
+@pitch@节距
+@stagger angle@安装角
+@blade inlet angle@（叶片）进口角
+@blade outlet angle@（叶片）出口角
+@camber angle@叶型折转角
+@flow inlet angle@进气角
+@incidence@冲角
+@flow outlet angle@出气角
+@deviation angle@落后角
+@flow turning angle@气流折转角
+@velocity triangle@速度三角形
+@method of plane cascade@平面叶栅法
+@method of modelling stage@模型级法
+@flow pattern@流型
+@profile loss@型面损失
+@annulus drag loss@环壁阻力损失
+@secondary flow loss@二次流损失
+@staionary blade loss@静叶损失
+@rotor blade loss@动叶损失
+@leaving velocity loss@余速损失
+@disc friction loss@轮盘摩擦损失
+@actual enthalpy rise@实际焓增
+@acutal enthalpy drop@实际焓降
+@enthalpy rise@焓增
+@enthalpy drop@焓降
+@wheel efficiency@轮周效率
+@stage efficiency@级效率
+@rigid rotor@刚性转子
+@flexible rotor@挠性转子
+@flexible rotor@柔性转子
+@disc coupled vibration@轮系振动
+@shafting vibration@轴系振动
+@gas flow bending stress@气流弯应力
+@thermal shock@热冲击
+@hot corrosion@热腐蚀
+@convection cooling@对流冷却
+@air film cooling@气膜冷却
+@transpiration cooling@发散冷却
+@impingement cooling@冲击冷却
+@inlet casing@进气缸
+@inlet plenum@进气室
+@exhaust casing@排气缸
+@exhaust plenum@排气室
+@discharge casing@排气缸
+@discharge plenum@排气室
+@rotor without blades@转子体
+@hollow blade@空心叶片
+@integral tip@叶冠
+@integral shroud@叶冠
+@blade root@叶根
+@long shank blade root@长颈叶根
+@spacer@隔叶块
+@locking piece@锁口件
+@center support system@定中系统
+@sealing@气封
+@surge preventing device@防喘装置
+@internal loss@内损失
+@external loss@外损失
+@internal efficiency@内效率
+@reheat factor@重热系数
+@stall@失速
+@surge margin@喘振裕度
+@surge limit@喘振边界
+@choking limit@阻塞极限
+@compressor characteristic curves@压气机特性线
+@turbine characteristic curves@透平特性线
+@straight flow combustor@顺流式燃烧室
+@counter flow combustor@逆流式燃烧室
+@combustion zone@燃烧区
+@recirculating zone@回流区
+@dilution zone@掺混区
+@atomization@雾化
+@atomized particle size@雾化细度
+@spray cone angle@雾化锥度
+@catalytic combustion@催化燃烧
+@theoretical combustion temperature@理论燃烧温度
+@carbon deposit@积碳
+@flame holder@火焰稳定器
+@combustor outer casing@燃烧室外壳
+@swirler@旋流器
+@fuel atomizer@喷油嘴
+@gas fuel nozzle@气体燃料喷嘴
+@dual fuel nozzle@双燃料喷嘴
+@fuel coefficient@燃料系数
+@total pressure recover factor@全压恢复系数
+@total pressure recover factor@全压保持系数
+@volumetric heat release rate@容积热强度
+@area heat release rate@面积热强度
+@flame failure limit@熄火极限
+@logarithmic mean temperature difference@对数平均温差
+@tube bundle@管束
+@tube nest@管束
+@tube plate@管板
+@regenerator effectiveness@回热度
+@total pressure loss for gas side@燃气侧全压损失
+@total pressure loss for air side@空气侧全压损失
+@compactness factor@紧凑系数
