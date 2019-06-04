@@ -488,8 +488,6 @@ public class FileProcessService {
 
         List<String> tagList = new ArrayList<String>();
 
-//        xml.setXmlString(xmlStr.substring(0,10));
-//        logger.info(xmlStr);
         Pattern pattern = Pattern.compile("(<(\\w+)[^</>]*>)([^<>]+)(</(\\w+)>)");
         Pattern chiPat = Pattern.compile("[\u4e00-\u9fa5]+");
         Matcher matcher = pattern.matcher(xmlStr);

@@ -7,6 +7,7 @@ import { Message } from "../message";
 import {Document} from "../document";
 import {tap} from "rxjs/operators";
 import {Xmls} from "../xmls";
+import {environment} from "../../environments/environment";
 
 const httpOptions = {
   headers: {'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
@@ -16,7 +17,7 @@ const httpOptions = {
 @Injectable({providedIn: 'root'})
 
 export class FileService {
-  private api = 'http://localhost:7890/api/file/';  // URL to web api
+  private api = environment.apiBase + '/api/file/';  // URL to web api
   processedFile: Document[];
   processedXML: Xmls[];
   alert_new = "none";

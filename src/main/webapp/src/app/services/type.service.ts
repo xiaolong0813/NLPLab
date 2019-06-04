@@ -5,6 +5,7 @@ import { Observable, of } from 'rxjs';
 
 import { Type } from "../type";
 import { Message } from "../message";
+import {environment} from "../../environments/environment";
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -13,7 +14,7 @@ const httpOptions = {
 @Injectable({providedIn: 'root'})
 
 export class TypeService {
-  private api = 'http://localhost:7890/api/types';  // URL to web api
+  private api = environment.apiBase + '/api/types';  // URL to web api
 
   constructor(
     private http:HttpClient

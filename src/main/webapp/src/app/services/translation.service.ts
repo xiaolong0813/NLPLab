@@ -3,6 +3,7 @@ import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {XmlTagContent} from "../XmlTagContent";
 import {Message} from "../message";
+import {environment} from "../../environments/environment";
 
 
 const httpOptions = {
@@ -16,7 +17,7 @@ const httpOptions = {
 })
 export class TranslationService {
 
-  private api = 'http://localhost:7890/api/translation/';
+  private api = environment.apiBase + '/api/translation/';
 
   constructor(
     private http: HttpClient

@@ -2,13 +2,10 @@ package autocheck.controllers;
 
 import autocheck.models.*;
 import autocheck.services.FileProcessService;
-import autocheck.services.TranslationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -18,15 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.json.Json;
 import javax.servlet.http.HttpServletRequest;
-import javax.sql.rowset.serial.SerialBlob;
 import java.io.*;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.Optional;
 
 @RestController

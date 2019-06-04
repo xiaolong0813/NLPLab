@@ -5,6 +5,7 @@ import { Observable, of } from 'rxjs';
 
 import { Parameter } from "../parameter";
 import { Message } from "../message";
+import {environment} from "../../environments/environment";
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -14,7 +15,7 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class ParameterService {
-  private api = 'http://localhost:7890/api/parameters';  // URL to web api
+  private api = environment.apiBase + '/api/parameters';  // URL to web api
   constructor(
     private http: HttpClient
   ) { }

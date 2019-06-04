@@ -28,14 +28,6 @@ public class DeviationController {
     public Iterable<Deviation> getDevs() {
         logger.info("Return all the deviation records");
         return deviationRepository.findAll();
-//        if (typeid == 0) {
-//            logger.info("Return all the deviation records");
-//            return deviationRepository.findAll();
-//        } else {
-//            Type type = typeRepository.findById(typeid).get();
-//            logger.info("Return deviation records with type " + type.getName());
-//            return deviationRepository.findByType(type.getName());
-//        }
     }
 
     @DeleteMapping

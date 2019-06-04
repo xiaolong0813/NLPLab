@@ -7,6 +7,7 @@ import {HttpClient, HttpHeaders} from "@angular/common/http";
 import { Observable, of } from 'rxjs';
 import {Deviation} from "../Deviation";
 import {Message} from "../message";
+import {environment} from "../../environments/environment";
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'multipart/form-data' })
@@ -29,7 +30,7 @@ HeroService类实例化。@Injectable装饰器为服务创建提供商，这里
 
 export class DeviationService {
   /*服务器上所请求的url*/
-  private api = 'http://localhost:7890/api/deviation/';  // URL to web api
+  private api = environment.apiBase + '/api/deviation/';  // URL to web api
   constructor(
     private http:HttpClient
   ) { }
