@@ -69,7 +69,7 @@ defaultTasks('startClient', 'startServer')
 
 task startClient(type:Exec) {
     workingDir "$webappDir"
-    commandLine './startClient.sh'
+    commandLine './buildClient.sh'
 }
 
 task startServer(type:Exec) {
