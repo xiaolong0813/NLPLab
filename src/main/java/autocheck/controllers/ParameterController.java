@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping(path = "/api/parameters")
 public class ParameterController {
     private static final Logger logger= LogManager.getLogger(ParameterController.class);
