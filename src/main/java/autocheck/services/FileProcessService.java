@@ -674,8 +674,8 @@ public class FileProcessService {
 
         while ((str = bf.readLine()) != null) {
 //            System.out.println(str.split("@")[1]);
-            key_index.put(str.split("@")[1].toLowerCase(), "TBR" + tempIndex);
-            index_value.put("TBR" + tempIndex, str.split("@")[2]);
+            key_index.put(str.split("@")[0].toLowerCase(), "TBR" + tempIndex);
+            index_value.put("TBR" + tempIndex, str.split("@")[1]);
 
             tempIndex ++;
         }
