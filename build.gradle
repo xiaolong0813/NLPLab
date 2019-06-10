@@ -64,14 +64,16 @@ sourceSets {
         }
     }
 }
-
-defaultTasks('startClient', 'startServer')
-
-task startClient(type:Exec) {
-    workingDir "$webappDir"
-    commandLine './buildClient.sh'
-}
-
-task startServer(type:Exec) {
-    commandLine './startServer.sh'
-}
+//
+//defaultTasks('startClient', 'startServer')
+//
+//task startClient(type:Exec) {
+//    workingDir "$webappDir"
+//    commandLine './buildClient.sh'
+//}
+//
+//task startServer(type:Exec) {
+//    commandLine './startServer.sh'
+//}
+//
+//startServer.dependsOn(startClient)
